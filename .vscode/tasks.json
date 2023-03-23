@@ -1,0 +1,27 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: sdcc.exe сборка активного файла",
+			"command": "C:/Users/georg/.platformio/packages/toolchain-sdcc/bin/sdcc.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"${file}",
+				"-o",
+				"${fileDirname}\\${fileBasenameNoExtension}.exe",
+				"-mstm8",
+				""
+			],
+			"options": {
+				"cwd": "C:/Users/georg/.platformio/packages/toolchain-sdcc/bin"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "компилятор: C:/Users/georg/.platformio/packages/toolchain-sdcc/bin/sdcc.exe"
+		}
+	]
+}

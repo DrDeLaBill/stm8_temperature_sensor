@@ -1,0 +1,907 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.2.0 #13081 (MINGW64)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module mb_process
+                                      6 	.optsdcc -mstm8
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _mb_packet_response_write_multiple_registers
+                                     12 	.globl _mb_packet_response_write_multiple_coils
+                                     13 	.globl _mb_packet_response_write_single_register
+                                     14 	.globl _mb_packet_response_write_single_coil
+                                     15 	.globl _mb_packet_response_read_input_registers
+                                     16 	.globl _mb_packet_response_read_holding_registers
+                                     17 	.globl _mb_packet_response_read_discrete_inputs
+                                     18 	.globl _mb_packet_response_read_coil
+                                     19 	.globl _mb_table_read_bit
+                                     20 	.globl _mb_table_write_bit
+                                     21 	.globl _mb_table_read
+                                     22 	.globl _mb_table_write
+                                     23 	.globl _mb_tx_packet_handler
+                                     24 	.globl _MB_PROCESS_Buffer
+                                     25 	.globl _mb_slave_process_read_coils
+                                     26 	.globl _mb_slave_process_read_discrere_inputs
+                                     27 	.globl _mb_slave_process_read_holding_registers
+                                     28 	.globl _mb_slave_process_read_input_registers
+                                     29 	.globl _mb_slave_process_write_single_coil
+                                     30 	.globl _mb_slave_process_write_single_register
+                                     31 	.globl _mb_slave_process_write_multiple_coils
+                                     32 	.globl _mb_slave_process_write_multiple_register
+                                     33 ;--------------------------------------------------------
+                                     34 ; ram data
+                                     35 ;--------------------------------------------------------
+                                     36 	.area DATA
+      000000                         37 _MB_PROCESS_Buffer::
+      000000                         38 	.ds 32
+                                     39 ;--------------------------------------------------------
+                                     40 ; ram data
+                                     41 ;--------------------------------------------------------
+                                     42 	.area INITIALIZED
+                                     43 ;--------------------------------------------------------
+                                     44 ; absolute external ram data
+                                     45 ;--------------------------------------------------------
+                                     46 	.area DABS (ABS)
+                                     47 
+                                     48 ; default segment ordering for linker
+                                     49 	.area HOME
+                                     50 	.area GSINIT
+                                     51 	.area GSFINAL
+                                     52 	.area CONST
+                                     53 	.area INITIALIZER
+                                     54 	.area CODE
+                                     55 
+                                     56 ;--------------------------------------------------------
+                                     57 ; global & static initialisations
+                                     58 ;--------------------------------------------------------
+                                     59 	.area HOME
+                                     60 	.area GSINIT
+                                     61 	.area GSFINAL
+                                     62 	.area GSINIT
+                                     63 ;--------------------------------------------------------
+                                     64 ; Home
+                                     65 ;--------------------------------------------------------
+                                     66 	.area HOME
+                                     67 	.area HOME
+                                     68 ;--------------------------------------------------------
+                                     69 ; code
+                                     70 ;--------------------------------------------------------
+                                     71 	.area CODE
+                                     72 ;	lib\modbus\mb-process.c: 19: mb_error_e mb_slave_process_read_coils(mb_packet_s* Packet)
+                                     73 ;	-----------------------------------------
+                                     74 ;	 function mb_slave_process_read_coils
+                                     75 ;	-----------------------------------------
+      000000                         76 _mb_slave_process_read_coils:
+      000000 52 1F            [ 2]   77 	sub	sp, #31
+                                     78 ;	lib\modbus\mb-process.c: 24: Start=Packet->u16_1;
+      000002 1F 1A            [ 2]   79 	ldw	(0x1a, sp), x
+      000004 EE 03            [ 2]   80 	ldw	x, (0x3, x)
+                                     81 ;	lib\modbus\mb-process.c: 25: End=(uint32_t)Packet->u16_2+Start;
+      000006 16 1A            [ 2]   82 	ldw	y, (0x1a, sp)
+      000008 90 EE 05         [ 2]   83 	ldw	y, (0x5, y)
+      00000B 4F               [ 1]   84 	clr	a
+      00000C 0F 12            [ 1]   85 	clr	(0x12, sp)
+      00000E 1F 18            [ 2]   86 	ldw	(0x18, sp), x
+      000010 0F 17            [ 1]   87 	clr	(0x17, sp)
+      000012 0F 16            [ 1]   88 	clr	(0x16, sp)
+      000014 72 F9 18         [ 2]   89 	addw	y, (0x18, sp)
+      000017 19 17            [ 1]   90 	adc	a, (0x17, sp)
+      000019 6B 1D            [ 1]   91 	ld	(0x1d, sp), a
+      00001B 7B 12            [ 1]   92 	ld	a, (0x12, sp)
+      00001D 19 16            [ 1]   93 	adc	a, (0x16, sp)
+      00001F 17 0E            [ 2]   94 	ldw	(0x0e, sp), y
+      000021 6B 0C            [ 1]   95 	ld	(0x0c, sp), a
+      000023 7B 1D            [ 1]   96 	ld	a, (0x1d, sp)
+      000025 6B 0D            [ 1]   97 	ld	(0x0d, sp), a
+                                     98 ;	lib\modbus\mb-process.c: 27: for(i=0;Start<End&&(i/8)<MB_PROCESS_MAX_DATA;Start++,i++)
+      000027 1F 1C            [ 2]   99 	ldw	(0x1c, sp), x
+      000029 5F               [ 1]  100 	clrw	x
+      00002A 1F 1E            [ 2]  101 	ldw	(0x1e, sp), x
+      00002C                        102 00110$:
+      00002C 16 1C            [ 2]  103 	ldw	y, (0x1c, sp)
+      00002E 17 12            [ 2]  104 	ldw	(0x12, sp), y
+      000030 5F               [ 1]  105 	clrw	x
+      000031 1F 10            [ 2]  106 	ldw	(0x10, sp), x
+      000033 16 1E            [ 2]  107 	ldw	y, (0x1e, sp)
+      000035 17 14            [ 2]  108 	ldw	(0x14, sp), y
+      000037 93               [ 1]  109 	ldw	x, y
+      000038 54               [ 2]  110 	srlw	x
+      000039 54               [ 2]  111 	srlw	x
+      00003A 54               [ 2]  112 	srlw	x
+      00003B 1F 16            [ 2]  113 	ldw	(0x16, sp), x
+                                    114 ;	lib\modbus\mb-process.c: 29: if(i%8==0)MB_PROCESS_Buffer[i/8]=0;
+      00003D 7B 15            [ 1]  115 	ld	a, (0x15, sp)
+      00003F A4 07            [ 1]  116 	and	a, #0x07
+      000041 6B 19            [ 1]  117 	ld	(0x19, sp), a
+      000043 0F 18            [ 1]  118 	clr	(0x18, sp)
+                                    119 ;	lib\modbus\mb-process.c: 27: for(i=0;Start<End&&(i/8)<MB_PROCESS_MAX_DATA;Start++,i++)
+      000045 1E 12            [ 2]  120 	ldw	x, (0x12, sp)
+      000047 13 0E            [ 2]  121 	cpw	x, (0x0e, sp)
+      000049 7B 11            [ 1]  122 	ld	a, (0x11, sp)
+      00004B 12 0D            [ 1]  123 	sbc	a, (0x0d, sp)
+      00004D 7B 10            [ 1]  124 	ld	a, (0x10, sp)
+      00004F 12 0C            [ 1]  125 	sbc	a, (0x0c, sp)
+      000051 24 44            [ 1]  126 	jrnc	00103$
+      000053 1E 16            [ 2]  127 	ldw	x, (0x16, sp)
+      000055 A3 00 1E         [ 2]  128 	cpw	x, #0x001e
+      000058 24 3D            [ 1]  129 	jrnc	00103$
+                                    130 ;	lib\modbus\mb-process.c: 29: if(i%8==0)MB_PROCESS_Buffer[i/8]=0;
+      00005A 1E 18            [ 2]  131 	ldw	x, (0x18, sp)
+      00005C 26 06            [ 1]  132 	jrne	00102$
+      00005E 1E 16            [ 2]  133 	ldw	x, (0x16, sp)
+      000060 72 4Fu00u00      [ 1]  134 	clr	((_MB_PROCESS_Buffer+0), x)
+      000064                        135 00102$:
+                                    136 ;	lib\modbus\mb-process.c: 30: MB_PROCESS_Buffer[i/8]|=mb_table_read_bit(TBALE_Coils,Start)<<(i%8);
+      000064 1E 16            [ 2]  137 	ldw	x, (0x16, sp)
+      000066 1Cr00r00         [ 2]  138 	addw	x, #(_MB_PROCESS_Buffer+0)
+      000069 F6               [ 1]  139 	ld	a, (x)
+      00006A 6B 17            [ 1]  140 	ld	(0x17, sp), a
+      00006C 89               [ 2]  141 	pushw	x
+      00006D 16 1E            [ 2]  142 	ldw	y, (0x1e, sp)
+      00006F 90 89            [ 2]  143 	pushw	y
+      000071 AEr00r00         [ 2]  144 	ldw	x, #(_TBALE_Coils+0)
+      000074 CDr00r00         [ 4]  145 	call	_mb_table_read_bit
+      000077 85               [ 2]  146 	popw	x
+      000078 61               [ 1]  147 	exg	a, yl
+      000079 7B 19            [ 1]  148 	ld	a, (0x19, sp)
+      00007B 61               [ 1]  149 	exg	a, yl
+      00007C 88               [ 1]  150 	push	a
+      00007D 90 9F            [ 1]  151 	ld	a, yl
+      00007F 4D               [ 1]  152 	tnz	a
+      000080 27 05            [ 1]  153 	jreq	00149$
+      000082                        154 00148$:
+      000082 08 01            [ 1]  155 	sll	(1, sp)
+      000084 4A               [ 1]  156 	dec	a
+      000085 26 FB            [ 1]  157 	jrne	00148$
+      000087                        158 00149$:
+      000087 84               [ 1]  159 	pop	a
+      000088 1A 17            [ 1]  160 	or	a, (0x17, sp)
+      00008A F7               [ 1]  161 	ld	(x), a
+                                    162 ;	lib\modbus\mb-process.c: 27: for(i=0;Start<End&&(i/8)<MB_PROCESS_MAX_DATA;Start++,i++)
+      00008B 1E 1C            [ 2]  163 	ldw	x, (0x1c, sp)
+      00008D 5C               [ 1]  164 	incw	x
+      00008E 1F 1C            [ 2]  165 	ldw	(0x1c, sp), x
+      000090 1E 1E            [ 2]  166 	ldw	x, (0x1e, sp)
+      000092 5C               [ 1]  167 	incw	x
+      000093 1F 1E            [ 2]  168 	ldw	(0x1e, sp), x
+      000095 20 95            [ 2]  169 	jra	00110$
+      000097                        170 00103$:
+                                    171 ;	lib\modbus\mb-process.c: 33: Size=i/8;
+      000097 1E 16            [ 2]  172 	ldw	x, (0x16, sp)
+                                    173 ;	lib\modbus\mb-process.c: 34: if(i%8)Size++;
+      000099 16 18            [ 2]  174 	ldw	y, (0x18, sp)
+      00009B 27 01            [ 1]  175 	jreq	00105$
+      00009D 5C               [ 1]  176 	incw	x
+      00009E                        177 00105$:
+                                    178 ;	lib\modbus\mb-process.c: 37: mb_packet_response_read_coil(&tmpPacket,Size,MB_PROCESS_Buffer);
+      00009E 4Br00            [ 1]  179 	push	#<(_MB_PROCESS_Buffer+0)
+      0000A0 4Bs00            [ 1]  180 	push	#((_MB_PROCESS_Buffer+0) >> 8)
+      0000A2 9F               [ 1]  181 	ld	a, xl
+      0000A3 96               [ 1]  182 	ldw	x, sp
+      0000A4 1C 00 03         [ 2]  183 	addw	x, #3
+      0000A7 CDr00r00         [ 4]  184 	call	_mb_packet_response_read_coil
+                                    185 ;	lib\modbus\mb-process.c: 39: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      0000AA 1E 1A            [ 2]  186 	ldw	x, (0x1a, sp)
+      0000AC F6               [ 1]  187 	ld	a, (x)
+      0000AD 27 05            [ 1]  188 	jreq	00107$
+                                    189 ;	lib\modbus\mb-process.c: 41: mb_tx_packet_handler(&tmpPacket);
+      0000AF 96               [ 1]  190 	ldw	x, sp
+      0000B0 5C               [ 1]  191 	incw	x
+      0000B1 CDr00r00         [ 4]  192 	call	_mb_tx_packet_handler
+      0000B4                        193 00107$:
+                                    194 ;	lib\modbus\mb-process.c: 42: return MB_OK;
+      0000B4 4F               [ 1]  195 	clr	a
+                                    196 ;	lib\modbus\mb-process.c: 43: }
+      0000B5 5B 1F            [ 2]  197 	addw	sp, #31
+      0000B7 81               [ 4]  198 	ret
+                                    199 ;	lib\modbus\mb-process.c: 45: mb_error_e mb_slave_process_read_discrere_inputs(mb_packet_s* Packet)
+                                    200 ;	-----------------------------------------
+                                    201 ;	 function mb_slave_process_read_discrere_inputs
+                                    202 ;	-----------------------------------------
+      0000B8                        203 _mb_slave_process_read_discrere_inputs:
+      0000B8 52 1F            [ 2]  204 	sub	sp, #31
+                                    205 ;	lib\modbus\mb-process.c: 50: Start=Packet->u16_1;
+      0000BA 1F 1A            [ 2]  206 	ldw	(0x1a, sp), x
+      0000BC EE 03            [ 2]  207 	ldw	x, (0x3, x)
+                                    208 ;	lib\modbus\mb-process.c: 51: End=(uint32_t)Packet->u16_2+Start;
+      0000BE 16 1A            [ 2]  209 	ldw	y, (0x1a, sp)
+      0000C0 90 EE 05         [ 2]  210 	ldw	y, (0x5, y)
+      0000C3 4F               [ 1]  211 	clr	a
+      0000C4 0F 12            [ 1]  212 	clr	(0x12, sp)
+      0000C6 1F 18            [ 2]  213 	ldw	(0x18, sp), x
+      0000C8 0F 17            [ 1]  214 	clr	(0x17, sp)
+      0000CA 0F 16            [ 1]  215 	clr	(0x16, sp)
+      0000CC 72 F9 18         [ 2]  216 	addw	y, (0x18, sp)
+      0000CF 19 17            [ 1]  217 	adc	a, (0x17, sp)
+      0000D1 6B 1D            [ 1]  218 	ld	(0x1d, sp), a
+      0000D3 7B 12            [ 1]  219 	ld	a, (0x12, sp)
+      0000D5 19 16            [ 1]  220 	adc	a, (0x16, sp)
+      0000D7 17 0E            [ 2]  221 	ldw	(0x0e, sp), y
+      0000D9 6B 0C            [ 1]  222 	ld	(0x0c, sp), a
+      0000DB 7B 1D            [ 1]  223 	ld	a, (0x1d, sp)
+      0000DD 6B 0D            [ 1]  224 	ld	(0x0d, sp), a
+                                    225 ;	lib\modbus\mb-process.c: 53: for(i=0;Start<End&&(i/8)<MB_PROCESS_MAX_DATA;Start++,i++)
+      0000DF 1F 1C            [ 2]  226 	ldw	(0x1c, sp), x
+      0000E1 5F               [ 1]  227 	clrw	x
+      0000E2 1F 1E            [ 2]  228 	ldw	(0x1e, sp), x
+      0000E4                        229 00110$:
+      0000E4 16 1C            [ 2]  230 	ldw	y, (0x1c, sp)
+      0000E6 17 12            [ 2]  231 	ldw	(0x12, sp), y
+      0000E8 5F               [ 1]  232 	clrw	x
+      0000E9 1F 10            [ 2]  233 	ldw	(0x10, sp), x
+      0000EB 16 1E            [ 2]  234 	ldw	y, (0x1e, sp)
+      0000ED 17 14            [ 2]  235 	ldw	(0x14, sp), y
+      0000EF 93               [ 1]  236 	ldw	x, y
+      0000F0 54               [ 2]  237 	srlw	x
+      0000F1 54               [ 2]  238 	srlw	x
+      0000F2 54               [ 2]  239 	srlw	x
+      0000F3 1F 16            [ 2]  240 	ldw	(0x16, sp), x
+                                    241 ;	lib\modbus\mb-process.c: 55: if(i%8==0)MB_PROCESS_Buffer[i/8]=0;
+      0000F5 7B 15            [ 1]  242 	ld	a, (0x15, sp)
+      0000F7 A4 07            [ 1]  243 	and	a, #0x07
+      0000F9 6B 19            [ 1]  244 	ld	(0x19, sp), a
+      0000FB 0F 18            [ 1]  245 	clr	(0x18, sp)
+                                    246 ;	lib\modbus\mb-process.c: 53: for(i=0;Start<End&&(i/8)<MB_PROCESS_MAX_DATA;Start++,i++)
+      0000FD 1E 12            [ 2]  247 	ldw	x, (0x12, sp)
+      0000FF 13 0E            [ 2]  248 	cpw	x, (0x0e, sp)
+      000101 7B 11            [ 1]  249 	ld	a, (0x11, sp)
+      000103 12 0D            [ 1]  250 	sbc	a, (0x0d, sp)
+      000105 7B 10            [ 1]  251 	ld	a, (0x10, sp)
+      000107 12 0C            [ 1]  252 	sbc	a, (0x0c, sp)
+      000109 24 44            [ 1]  253 	jrnc	00103$
+      00010B 1E 16            [ 2]  254 	ldw	x, (0x16, sp)
+      00010D A3 00 1E         [ 2]  255 	cpw	x, #0x001e
+      000110 24 3D            [ 1]  256 	jrnc	00103$
+                                    257 ;	lib\modbus\mb-process.c: 55: if(i%8==0)MB_PROCESS_Buffer[i/8]=0;
+      000112 1E 18            [ 2]  258 	ldw	x, (0x18, sp)
+      000114 26 06            [ 1]  259 	jrne	00102$
+      000116 1E 16            [ 2]  260 	ldw	x, (0x16, sp)
+      000118 72 4Fu00u00      [ 1]  261 	clr	((_MB_PROCESS_Buffer+0), x)
+      00011C                        262 00102$:
+                                    263 ;	lib\modbus\mb-process.c: 56: MB_PROCESS_Buffer[i/8]|=mb_table_read_bit(TBALE_Discretes_Input,Start)<<(i%8);
+      00011C 1E 16            [ 2]  264 	ldw	x, (0x16, sp)
+      00011E 1Cr00r00         [ 2]  265 	addw	x, #(_MB_PROCESS_Buffer+0)
+      000121 F6               [ 1]  266 	ld	a, (x)
+      000122 6B 17            [ 1]  267 	ld	(0x17, sp), a
+      000124 89               [ 2]  268 	pushw	x
+      000125 16 1E            [ 2]  269 	ldw	y, (0x1e, sp)
+      000127 90 89            [ 2]  270 	pushw	y
+      000129 AEr00r00         [ 2]  271 	ldw	x, #(_TBALE_Discretes_Input+0)
+      00012C CDr00r00         [ 4]  272 	call	_mb_table_read_bit
+      00012F 85               [ 2]  273 	popw	x
+      000130 61               [ 1]  274 	exg	a, yl
+      000131 7B 19            [ 1]  275 	ld	a, (0x19, sp)
+      000133 61               [ 1]  276 	exg	a, yl
+      000134 88               [ 1]  277 	push	a
+      000135 90 9F            [ 1]  278 	ld	a, yl
+      000137 4D               [ 1]  279 	tnz	a
+      000138 27 05            [ 1]  280 	jreq	00149$
+      00013A                        281 00148$:
+      00013A 08 01            [ 1]  282 	sll	(1, sp)
+      00013C 4A               [ 1]  283 	dec	a
+      00013D 26 FB            [ 1]  284 	jrne	00148$
+      00013F                        285 00149$:
+      00013F 84               [ 1]  286 	pop	a
+      000140 1A 17            [ 1]  287 	or	a, (0x17, sp)
+      000142 F7               [ 1]  288 	ld	(x), a
+                                    289 ;	lib\modbus\mb-process.c: 53: for(i=0;Start<End&&(i/8)<MB_PROCESS_MAX_DATA;Start++,i++)
+      000143 1E 1C            [ 2]  290 	ldw	x, (0x1c, sp)
+      000145 5C               [ 1]  291 	incw	x
+      000146 1F 1C            [ 2]  292 	ldw	(0x1c, sp), x
+      000148 1E 1E            [ 2]  293 	ldw	x, (0x1e, sp)
+      00014A 5C               [ 1]  294 	incw	x
+      00014B 1F 1E            [ 2]  295 	ldw	(0x1e, sp), x
+      00014D 20 95            [ 2]  296 	jra	00110$
+      00014F                        297 00103$:
+                                    298 ;	lib\modbus\mb-process.c: 59: Size=i/8;
+      00014F 1E 16            [ 2]  299 	ldw	x, (0x16, sp)
+                                    300 ;	lib\modbus\mb-process.c: 60: if(i%8)Size++;
+      000151 16 18            [ 2]  301 	ldw	y, (0x18, sp)
+      000153 27 01            [ 1]  302 	jreq	00105$
+      000155 5C               [ 1]  303 	incw	x
+      000156                        304 00105$:
+                                    305 ;	lib\modbus\mb-process.c: 63: mb_packet_response_read_discrete_inputs(&tmpPacket,Size,MB_PROCESS_Buffer);
+      000156 4Br00            [ 1]  306 	push	#<(_MB_PROCESS_Buffer+0)
+      000158 4Bs00            [ 1]  307 	push	#((_MB_PROCESS_Buffer+0) >> 8)
+      00015A 9F               [ 1]  308 	ld	a, xl
+      00015B 96               [ 1]  309 	ldw	x, sp
+      00015C 1C 00 03         [ 2]  310 	addw	x, #3
+      00015F CDr00r00         [ 4]  311 	call	_mb_packet_response_read_discrete_inputs
+                                    312 ;	lib\modbus\mb-process.c: 65: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      000162 1E 1A            [ 2]  313 	ldw	x, (0x1a, sp)
+      000164 F6               [ 1]  314 	ld	a, (x)
+      000165 27 05            [ 1]  315 	jreq	00107$
+                                    316 ;	lib\modbus\mb-process.c: 67: mb_tx_packet_handler(&tmpPacket);
+      000167 96               [ 1]  317 	ldw	x, sp
+      000168 5C               [ 1]  318 	incw	x
+      000169 CDr00r00         [ 4]  319 	call	_mb_tx_packet_handler
+      00016C                        320 00107$:
+                                    321 ;	lib\modbus\mb-process.c: 68: return MB_OK;
+      00016C 4F               [ 1]  322 	clr	a
+                                    323 ;	lib\modbus\mb-process.c: 69: }
+      00016D 5B 1F            [ 2]  324 	addw	sp, #31
+      00016F 81               [ 4]  325 	ret
+                                    326 ;	lib\modbus\mb-process.c: 71: mb_error_e mb_slave_process_read_holding_registers(mb_packet_s* Packet)
+                                    327 ;	-----------------------------------------
+                                    328 ;	 function mb_slave_process_read_holding_registers
+                                    329 ;	-----------------------------------------
+      000170                        330 _mb_slave_process_read_holding_registers:
+      000170 52 1E            [ 2]  331 	sub	sp, #30
+                                    332 ;	lib\modbus\mb-process.c: 76: Start=Packet->u16_1;
+      000172 1F 1B            [ 2]  333 	ldw	(0x1b, sp), x
+      000174 90 93            [ 1]  334 	ldw	y, x
+      000176 90 EE 03         [ 2]  335 	ldw	y, (0x3, y)
+                                    336 ;	lib\modbus\mb-process.c: 77: End=(uint32_t)Packet->u16_2+Start;
+      000179 1E 1B            [ 2]  337 	ldw	x, (0x1b, sp)
+      00017B EE 05            [ 2]  338 	ldw	x, (0x5, x)
+      00017D 4F               [ 1]  339 	clr	a
+      00017E 0F 01            [ 1]  340 	clr	(0x01, sp)
+      000180 17 15            [ 2]  341 	ldw	(0x15, sp), y
+      000182 0F 14            [ 1]  342 	clr	(0x14, sp)
+      000184 0F 13            [ 1]  343 	clr	(0x13, sp)
+      000186 72 FB 15         [ 2]  344 	addw	x, (0x15, sp)
+      000189 19 14            [ 1]  345 	adc	a, (0x14, sp)
+      00018B 6B 18            [ 1]  346 	ld	(0x18, sp), a
+      00018D 7B 01            [ 1]  347 	ld	a, (0x01, sp)
+      00018F 19 13            [ 1]  348 	adc	a, (0x13, sp)
+      000191 1F 12            [ 2]  349 	ldw	(0x12, sp), x
+      000193 6B 10            [ 1]  350 	ld	(0x10, sp), a
+      000195 7B 18            [ 1]  351 	ld	a, (0x18, sp)
+      000197 6B 11            [ 1]  352 	ld	(0x11, sp), a
+                                    353 ;	lib\modbus\mb-process.c: 79: for(i=0;Start<End&&i<MB_PROCESS_MAX_DATA;Start++,i+=2)
+      000199 5F               [ 1]  354 	clrw	x
+      00019A 1F 14            [ 2]  355 	ldw	(0x14, sp), x
+      00019C 17 1D            [ 2]  356 	ldw	(0x1d, sp), y
+      00019E                        357 00106$:
+      00019E 16 1D            [ 2]  358 	ldw	y, (0x1d, sp)
+      0001A0 17 18            [ 2]  359 	ldw	(0x18, sp), y
+      0001A2 5F               [ 1]  360 	clrw	x
+      0001A3 1F 16            [ 2]  361 	ldw	(0x16, sp), x
+                                    362 ;	lib\modbus\mb-process.c: 84: MB_PROCESS_Buffer[i+1]=Temp&0xff;
+      0001A5 7B 15            [ 1]  363 	ld	a, (0x15, sp)
+      0001A7 6B 1A            [ 1]  364 	ld	(0x1a, sp), a
+                                    365 ;	lib\modbus\mb-process.c: 79: for(i=0;Start<End&&i<MB_PROCESS_MAX_DATA;Start++,i+=2)
+      0001A9 1E 18            [ 2]  366 	ldw	x, (0x18, sp)
+      0001AB 13 12            [ 2]  367 	cpw	x, (0x12, sp)
+      0001AD 7B 17            [ 1]  368 	ld	a, (0x17, sp)
+      0001AF 12 11            [ 1]  369 	sbc	a, (0x11, sp)
+      0001B1 7B 16            [ 1]  370 	ld	a, (0x16, sp)
+      0001B3 12 10            [ 1]  371 	sbc	a, (0x10, sp)
+      0001B5 24 34            [ 1]  372 	jrnc	00101$
+      0001B7 1E 14            [ 2]  373 	ldw	x, (0x14, sp)
+      0001B9 A3 00 1E         [ 2]  374 	cpw	x, #0x001e
+      0001BC 24 2D            [ 1]  375 	jrnc	00101$
+                                    376 ;	lib\modbus\mb-process.c: 81: Temp=mb_table_read(TABLE_Holding_Registers,Start);
+      0001BE 1E 1D            [ 2]  377 	ldw	x, (0x1d, sp)
+      0001C0 89               [ 2]  378 	pushw	x
+      0001C1 AEr00r00         [ 2]  379 	ldw	x, #(_TABLE_Holding_Registers+0)
+      0001C4 CDr00r00         [ 4]  380 	call	_mb_table_read
+      0001C7 51               [ 1]  381 	exgw	x, y
+                                    382 ;	lib\modbus\mb-process.c: 83: MB_PROCESS_Buffer[i]=(Temp>>8)&0xff;
+      0001C8 1E 14            [ 2]  383 	ldw	x, (0x14, sp)
+      0001CA 1Cr00r00         [ 2]  384 	addw	x, #(_MB_PROCESS_Buffer+0)
+      0001CD 90 9E            [ 1]  385 	ld	a, yh
+      0001CF F7               [ 1]  386 	ld	(x), a
+                                    387 ;	lib\modbus\mb-process.c: 84: MB_PROCESS_Buffer[i+1]=Temp&0xff;
+      0001D0 7B 1A            [ 1]  388 	ld	a, (0x1a, sp)
+      0001D2 4C               [ 1]  389 	inc	a
+      0001D3 97               [ 1]  390 	ld	xl, a
+      0001D4 49               [ 1]  391 	rlc	a
+      0001D5 4F               [ 1]  392 	clr	a
+      0001D6 A2 00            [ 1]  393 	sbc	a, #0x00
+      0001D8 95               [ 1]  394 	ld	xh, a
+      0001D9 90 9F            [ 1]  395 	ld	a, yl
+      0001DB D7u00u00         [ 1]  396 	ld	((_MB_PROCESS_Buffer+0), x), a
+                                    397 ;	lib\modbus\mb-process.c: 79: for(i=0;Start<End&&i<MB_PROCESS_MAX_DATA;Start++,i+=2)
+      0001DE 1E 1D            [ 2]  398 	ldw	x, (0x1d, sp)
+      0001E0 5C               [ 1]  399 	incw	x
+      0001E1 1F 1D            [ 2]  400 	ldw	(0x1d, sp), x
+      0001E3 1E 14            [ 2]  401 	ldw	x, (0x14, sp)
+      0001E5 5C               [ 1]  402 	incw	x
+      0001E6 5C               [ 1]  403 	incw	x
+      0001E7 1F 14            [ 2]  404 	ldw	(0x14, sp), x
+      0001E9 20 B3            [ 2]  405 	jra	00106$
+      0001EB                        406 00101$:
+                                    407 ;	lib\modbus\mb-process.c: 87: mb_packet_s tmpPacket = {0};
+      0001EB 0F 05            [ 1]  408 	clr	(0x05, sp)
+      0001ED 0F 06            [ 1]  409 	clr	(0x06, sp)
+      0001EF 0F 07            [ 1]  410 	clr	(0x07, sp)
+      0001F1 5F               [ 1]  411 	clrw	x
+      0001F2 1F 08            [ 2]  412 	ldw	(0x08, sp), x
+      0001F4 5F               [ 1]  413 	clrw	x
+      0001F5 1F 0A            [ 2]  414 	ldw	(0x0a, sp), x
+      0001F7 0F 0C            [ 1]  415 	clr	(0x0c, sp)
+      0001F9 5F               [ 1]  416 	clrw	x
+      0001FA 1F 0D            [ 2]  417 	ldw	(0x0d, sp), x
+      0001FC 0F 0F            [ 1]  418 	clr	(0x0f, sp)
+                                    419 ;	lib\modbus\mb-process.c: 88: mb_packet_response_read_holding_registers(&tmpPacket,i,MB_PROCESS_Buffer);
+      0001FE 4Br00            [ 1]  420 	push	#<(_MB_PROCESS_Buffer+0)
+      000200 4Bs00            [ 1]  421 	push	#((_MB_PROCESS_Buffer+0) >> 8)
+      000202 7B 1C            [ 1]  422 	ld	a, (0x1c, sp)
+      000204 96               [ 1]  423 	ldw	x, sp
+      000205 1C 00 07         [ 2]  424 	addw	x, #7
+      000208 CDr00r00         [ 4]  425 	call	_mb_packet_response_read_holding_registers
+                                    426 ;	lib\modbus\mb-process.c: 90: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      00020B 1E 1B            [ 2]  427 	ldw	x, (0x1b, sp)
+      00020D F6               [ 1]  428 	ld	a, (x)
+      00020E 27 07            [ 1]  429 	jreq	00103$
+                                    430 ;	lib\modbus\mb-process.c: 92: mb_tx_packet_handler(&tmpPacket);
+      000210 96               [ 1]  431 	ldw	x, sp
+      000211 1C 00 05         [ 2]  432 	addw	x, #5
+      000214 CDr00r00         [ 4]  433 	call	_mb_tx_packet_handler
+      000217                        434 00103$:
+                                    435 ;	lib\modbus\mb-process.c: 93: return MB_OK;
+      000217 4F               [ 1]  436 	clr	a
+                                    437 ;	lib\modbus\mb-process.c: 94: }
+      000218 5B 1E            [ 2]  438 	addw	sp, #30
+      00021A 81               [ 4]  439 	ret
+                                    440 ;	lib\modbus\mb-process.c: 96: mb_error_e mb_slave_process_read_input_registers(mb_packet_s* Packet)
+                                    441 ;	-----------------------------------------
+                                    442 ;	 function mb_slave_process_read_input_registers
+                                    443 ;	-----------------------------------------
+      00021B                        444 _mb_slave_process_read_input_registers:
+      00021B 52 1E            [ 2]  445 	sub	sp, #30
+                                    446 ;	lib\modbus\mb-process.c: 101: Start=Packet->u16_1;
+      00021D 1F 1B            [ 2]  447 	ldw	(0x1b, sp), x
+      00021F 90 93            [ 1]  448 	ldw	y, x
+      000221 90 EE 03         [ 2]  449 	ldw	y, (0x3, y)
+                                    450 ;	lib\modbus\mb-process.c: 102: End=(uint32_t)Packet->u16_2+Start;
+      000224 1E 1B            [ 2]  451 	ldw	x, (0x1b, sp)
+      000226 EE 05            [ 2]  452 	ldw	x, (0x5, x)
+      000228 4F               [ 1]  453 	clr	a
+      000229 0F 01            [ 1]  454 	clr	(0x01, sp)
+      00022B 17 15            [ 2]  455 	ldw	(0x15, sp), y
+      00022D 0F 14            [ 1]  456 	clr	(0x14, sp)
+      00022F 0F 13            [ 1]  457 	clr	(0x13, sp)
+      000231 72 FB 15         [ 2]  458 	addw	x, (0x15, sp)
+      000234 19 14            [ 1]  459 	adc	a, (0x14, sp)
+      000236 6B 18            [ 1]  460 	ld	(0x18, sp), a
+      000238 7B 01            [ 1]  461 	ld	a, (0x01, sp)
+      00023A 19 13            [ 1]  462 	adc	a, (0x13, sp)
+      00023C 1F 12            [ 2]  463 	ldw	(0x12, sp), x
+      00023E 6B 10            [ 1]  464 	ld	(0x10, sp), a
+      000240 7B 18            [ 1]  465 	ld	a, (0x18, sp)
+      000242 6B 11            [ 1]  466 	ld	(0x11, sp), a
+                                    467 ;	lib\modbus\mb-process.c: 104: for(i=0;Start<End&&i<MB_PROCESS_MAX_DATA;Start++,i+=2)
+      000244 5F               [ 1]  468 	clrw	x
+      000245 1F 14            [ 2]  469 	ldw	(0x14, sp), x
+      000247 17 1D            [ 2]  470 	ldw	(0x1d, sp), y
+      000249                        471 00106$:
+      000249 16 1D            [ 2]  472 	ldw	y, (0x1d, sp)
+      00024B 17 18            [ 2]  473 	ldw	(0x18, sp), y
+      00024D 5F               [ 1]  474 	clrw	x
+      00024E 1F 16            [ 2]  475 	ldw	(0x16, sp), x
+                                    476 ;	lib\modbus\mb-process.c: 109: MB_PROCESS_Buffer[i+1]=Temp&0xff;
+      000250 7B 15            [ 1]  477 	ld	a, (0x15, sp)
+      000252 6B 1A            [ 1]  478 	ld	(0x1a, sp), a
+                                    479 ;	lib\modbus\mb-process.c: 104: for(i=0;Start<End&&i<MB_PROCESS_MAX_DATA;Start++,i+=2)
+      000254 1E 18            [ 2]  480 	ldw	x, (0x18, sp)
+      000256 13 12            [ 2]  481 	cpw	x, (0x12, sp)
+      000258 7B 17            [ 1]  482 	ld	a, (0x17, sp)
+      00025A 12 11            [ 1]  483 	sbc	a, (0x11, sp)
+      00025C 7B 16            [ 1]  484 	ld	a, (0x16, sp)
+      00025E 12 10            [ 1]  485 	sbc	a, (0x10, sp)
+      000260 24 34            [ 1]  486 	jrnc	00101$
+      000262 1E 14            [ 2]  487 	ldw	x, (0x14, sp)
+      000264 A3 00 1E         [ 2]  488 	cpw	x, #0x001e
+      000267 24 2D            [ 1]  489 	jrnc	00101$
+                                    490 ;	lib\modbus\mb-process.c: 106: Temp=mb_table_read(TBALE_Input_Registers,Start);
+      000269 1E 1D            [ 2]  491 	ldw	x, (0x1d, sp)
+      00026B 89               [ 2]  492 	pushw	x
+      00026C AEr00r00         [ 2]  493 	ldw	x, #(_TBALE_Input_Registers+0)
+      00026F CDr00r00         [ 4]  494 	call	_mb_table_read
+      000272 51               [ 1]  495 	exgw	x, y
+                                    496 ;	lib\modbus\mb-process.c: 108: MB_PROCESS_Buffer[i]=(Temp>>8)&0xff;
+      000273 1E 14            [ 2]  497 	ldw	x, (0x14, sp)
+      000275 1Cr00r00         [ 2]  498 	addw	x, #(_MB_PROCESS_Buffer+0)
+      000278 90 9E            [ 1]  499 	ld	a, yh
+      00027A F7               [ 1]  500 	ld	(x), a
+                                    501 ;	lib\modbus\mb-process.c: 109: MB_PROCESS_Buffer[i+1]=Temp&0xff;
+      00027B 7B 1A            [ 1]  502 	ld	a, (0x1a, sp)
+      00027D 4C               [ 1]  503 	inc	a
+      00027E 97               [ 1]  504 	ld	xl, a
+      00027F 49               [ 1]  505 	rlc	a
+      000280 4F               [ 1]  506 	clr	a
+      000281 A2 00            [ 1]  507 	sbc	a, #0x00
+      000283 95               [ 1]  508 	ld	xh, a
+      000284 90 9F            [ 1]  509 	ld	a, yl
+      000286 D7u00u00         [ 1]  510 	ld	((_MB_PROCESS_Buffer+0), x), a
+                                    511 ;	lib\modbus\mb-process.c: 104: for(i=0;Start<End&&i<MB_PROCESS_MAX_DATA;Start++,i+=2)
+      000289 1E 1D            [ 2]  512 	ldw	x, (0x1d, sp)
+      00028B 5C               [ 1]  513 	incw	x
+      00028C 1F 1D            [ 2]  514 	ldw	(0x1d, sp), x
+      00028E 1E 14            [ 2]  515 	ldw	x, (0x14, sp)
+      000290 5C               [ 1]  516 	incw	x
+      000291 5C               [ 1]  517 	incw	x
+      000292 1F 14            [ 2]  518 	ldw	(0x14, sp), x
+      000294 20 B3            [ 2]  519 	jra	00106$
+      000296                        520 00101$:
+                                    521 ;	lib\modbus\mb-process.c: 112: mb_packet_s tmpPacket = {0};
+      000296 0F 05            [ 1]  522 	clr	(0x05, sp)
+      000298 0F 06            [ 1]  523 	clr	(0x06, sp)
+      00029A 0F 07            [ 1]  524 	clr	(0x07, sp)
+      00029C 5F               [ 1]  525 	clrw	x
+      00029D 1F 08            [ 2]  526 	ldw	(0x08, sp), x
+      00029F 5F               [ 1]  527 	clrw	x
+      0002A0 1F 0A            [ 2]  528 	ldw	(0x0a, sp), x
+      0002A2 0F 0C            [ 1]  529 	clr	(0x0c, sp)
+      0002A4 5F               [ 1]  530 	clrw	x
+      0002A5 1F 0D            [ 2]  531 	ldw	(0x0d, sp), x
+      0002A7 0F 0F            [ 1]  532 	clr	(0x0f, sp)
+                                    533 ;	lib\modbus\mb-process.c: 113: mb_packet_response_read_input_registers(&tmpPacket,i,MB_PROCESS_Buffer);
+      0002A9 4Br00            [ 1]  534 	push	#<(_MB_PROCESS_Buffer+0)
+      0002AB 4Bs00            [ 1]  535 	push	#((_MB_PROCESS_Buffer+0) >> 8)
+      0002AD 7B 1C            [ 1]  536 	ld	a, (0x1c, sp)
+      0002AF 96               [ 1]  537 	ldw	x, sp
+      0002B0 1C 00 07         [ 2]  538 	addw	x, #7
+      0002B3 CDr00r00         [ 4]  539 	call	_mb_packet_response_read_input_registers
+                                    540 ;	lib\modbus\mb-process.c: 115: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      0002B6 1E 1B            [ 2]  541 	ldw	x, (0x1b, sp)
+      0002B8 F6               [ 1]  542 	ld	a, (x)
+      0002B9 27 07            [ 1]  543 	jreq	00103$
+                                    544 ;	lib\modbus\mb-process.c: 117: mb_tx_packet_handler(&tmpPacket);
+      0002BB 96               [ 1]  545 	ldw	x, sp
+      0002BC 1C 00 05         [ 2]  546 	addw	x, #5
+      0002BF CDr00r00         [ 4]  547 	call	_mb_tx_packet_handler
+      0002C2                        548 00103$:
+                                    549 ;	lib\modbus\mb-process.c: 118: return MB_OK;
+      0002C2 4F               [ 1]  550 	clr	a
+                                    551 ;	lib\modbus\mb-process.c: 119: }
+      0002C3 5B 1E            [ 2]  552 	addw	sp, #30
+      0002C5 81               [ 4]  553 	ret
+                                    554 ;	lib\modbus\mb-process.c: 121: mb_error_e mb_slave_process_write_single_coil(mb_packet_s* Packet)
+                                    555 ;	-----------------------------------------
+                                    556 ;	 function mb_slave_process_write_single_coil
+                                    557 ;	-----------------------------------------
+      0002C6                        558 _mb_slave_process_write_single_coil:
+      0002C6 52 0F            [ 2]  559 	sub	sp, #15
+                                    560 ;	lib\modbus\mb-process.c: 123: mb_table_write_bit(TBALE_Coils,Packet->u16_1,Packet->u16_2>>8);
+      0002C8 1F 0E            [ 2]  561 	ldw	(0x0e, sp), x
+      0002CA 90 93            [ 1]  562 	ldw	y, x
+      0002CC 72 A9 00 05      [ 2]  563 	addw	y, #0x0005
+      0002D0 93               [ 1]  564 	ldw	x, y
+      0002D1 FE               [ 2]  565 	ldw	x, (x)
+      0002D2 9E               [ 1]  566 	ld	a, xh
+      0002D3 1E 0E            [ 2]  567 	ldw	x, (0x0e, sp)
+      0002D5 1C 00 03         [ 2]  568 	addw	x, #0x0003
+      0002D8 1F 0C            [ 2]  569 	ldw	(0x0c, sp), x
+      0002DA FE               [ 2]  570 	ldw	x, (x)
+      0002DB 90 89            [ 2]  571 	pushw	y
+      0002DD 88               [ 1]  572 	push	a
+      0002DE 89               [ 2]  573 	pushw	x
+      0002DF AEr00r00         [ 2]  574 	ldw	x, #(_TBALE_Coils+0)
+      0002E2 CDr00r00         [ 4]  575 	call	_mb_table_write_bit
+      0002E5 90 85            [ 2]  576 	popw	y
+                                    577 ;	lib\modbus\mb-process.c: 125: mb_packet_s tmpPacket = {0};
+      0002E7 0F 01            [ 1]  578 	clr	(0x01, sp)
+      0002E9 0F 02            [ 1]  579 	clr	(0x02, sp)
+      0002EB 0F 03            [ 1]  580 	clr	(0x03, sp)
+      0002ED 5F               [ 1]  581 	clrw	x
+      0002EE 1F 04            [ 2]  582 	ldw	(0x04, sp), x
+      0002F0 5F               [ 1]  583 	clrw	x
+      0002F1 1F 06            [ 2]  584 	ldw	(0x06, sp), x
+      0002F3 0F 08            [ 1]  585 	clr	(0x08, sp)
+      0002F5 5F               [ 1]  586 	clrw	x
+      0002F6 1F 09            [ 2]  587 	ldw	(0x09, sp), x
+      0002F8 0F 0B            [ 1]  588 	clr	(0x0b, sp)
+                                    589 ;	lib\modbus\mb-process.c: 126: mb_packet_response_write_single_coil(&tmpPacket,Packet->u16_1,Packet->u16_2);
+      0002FA 90 FE            [ 2]  590 	ldw	y, (y)
+      0002FC 1E 0C            [ 2]  591 	ldw	x, (0x0c, sp)
+      0002FE FE               [ 2]  592 	ldw	x, (x)
+      0002FF 90 89            [ 2]  593 	pushw	y
+      000301 89               [ 2]  594 	pushw	x
+      000302 96               [ 1]  595 	ldw	x, sp
+      000303 1C 00 05         [ 2]  596 	addw	x, #5
+      000306 CDr00r00         [ 4]  597 	call	_mb_packet_response_write_single_coil
+                                    598 ;	lib\modbus\mb-process.c: 128: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      000309 1E 0E            [ 2]  599 	ldw	x, (0x0e, sp)
+      00030B F6               [ 1]  600 	ld	a, (x)
+      00030C 27 05            [ 1]  601 	jreq	00102$
+                                    602 ;	lib\modbus\mb-process.c: 130: mb_tx_packet_handler(&tmpPacket);
+      00030E 96               [ 1]  603 	ldw	x, sp
+      00030F 5C               [ 1]  604 	incw	x
+      000310 CDr00r00         [ 4]  605 	call	_mb_tx_packet_handler
+      000313                        606 00102$:
+                                    607 ;	lib\modbus\mb-process.c: 131: return MB_OK;
+      000313 4F               [ 1]  608 	clr	a
+                                    609 ;	lib\modbus\mb-process.c: 132: }
+      000314 5B 0F            [ 2]  610 	addw	sp, #15
+      000316 81               [ 4]  611 	ret
+                                    612 ;	lib\modbus\mb-process.c: 134: mb_error_e mb_slave_process_write_single_register(mb_packet_s* Packet)
+                                    613 ;	-----------------------------------------
+                                    614 ;	 function mb_slave_process_write_single_register
+                                    615 ;	-----------------------------------------
+      000317                        616 _mb_slave_process_write_single_register:
+      000317 52 11            [ 2]  617 	sub	sp, #17
+                                    618 ;	lib\modbus\mb-process.c: 136: mb_table_write(TABLE_Holding_Registers,Packet->u16_1,Packet->u16_2);
+      000319 1F 10            [ 2]  619 	ldw	(0x10, sp), x
+      00031B 1C 00 05         [ 2]  620 	addw	x, #0x0005
+      00031E 1F 0C            [ 2]  621 	ldw	(0x0c, sp), x
+      000320 FE               [ 2]  622 	ldw	x, (x)
+      000321 16 10            [ 2]  623 	ldw	y, (0x10, sp)
+      000323 72 A9 00 03      [ 2]  624 	addw	y, #0x0003
+      000327 17 0E            [ 2]  625 	ldw	(0x0e, sp), y
+      000329 90 FE            [ 2]  626 	ldw	y, (y)
+      00032B 89               [ 2]  627 	pushw	x
+      00032C 90 89            [ 2]  628 	pushw	y
+      00032E AEr00r00         [ 2]  629 	ldw	x, #(_TABLE_Holding_Registers+0)
+      000331 CDr00r00         [ 4]  630 	call	_mb_table_write
+                                    631 ;	lib\modbus\mb-process.c: 138: mb_packet_s tmpPacket = {0};
+      000334 0F 01            [ 1]  632 	clr	(0x01, sp)
+      000336 0F 02            [ 1]  633 	clr	(0x02, sp)
+      000338 0F 03            [ 1]  634 	clr	(0x03, sp)
+      00033A 5F               [ 1]  635 	clrw	x
+      00033B 1F 04            [ 2]  636 	ldw	(0x04, sp), x
+      00033D 5F               [ 1]  637 	clrw	x
+      00033E 1F 06            [ 2]  638 	ldw	(0x06, sp), x
+      000340 0F 08            [ 1]  639 	clr	(0x08, sp)
+      000342 5F               [ 1]  640 	clrw	x
+      000343 1F 09            [ 2]  641 	ldw	(0x09, sp), x
+      000345 0F 0B            [ 1]  642 	clr	(0x0b, sp)
+                                    643 ;	lib\modbus\mb-process.c: 139: mb_packet_response_write_single_register(&tmpPacket,Packet->u16_1,Packet->u16_2);
+      000347 1E 0C            [ 2]  644 	ldw	x, (0x0c, sp)
+      000349 FE               [ 2]  645 	ldw	x, (x)
+      00034A 16 0E            [ 2]  646 	ldw	y, (0x0e, sp)
+      00034C 90 FE            [ 2]  647 	ldw	y, (y)
+      00034E 89               [ 2]  648 	pushw	x
+      00034F 90 89            [ 2]  649 	pushw	y
+      000351 96               [ 1]  650 	ldw	x, sp
+      000352 1C 00 05         [ 2]  651 	addw	x, #5
+      000355 CDr00r00         [ 4]  652 	call	_mb_packet_response_write_single_register
+                                    653 ;	lib\modbus\mb-process.c: 141: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      000358 1E 10            [ 2]  654 	ldw	x, (0x10, sp)
+      00035A F6               [ 1]  655 	ld	a, (x)
+      00035B 27 05            [ 1]  656 	jreq	00102$
+                                    657 ;	lib\modbus\mb-process.c: 143: mb_tx_packet_handler(&tmpPacket);
+      00035D 96               [ 1]  658 	ldw	x, sp
+      00035E 5C               [ 1]  659 	incw	x
+      00035F CDr00r00         [ 4]  660 	call	_mb_tx_packet_handler
+      000362                        661 00102$:
+                                    662 ;	lib\modbus\mb-process.c: 144: return MB_OK;
+      000362 4F               [ 1]  663 	clr	a
+                                    664 ;	lib\modbus\mb-process.c: 145: }
+      000363 5B 11            [ 2]  665 	addw	sp, #17
+      000365 81               [ 4]  666 	ret
+                                    667 ;	lib\modbus\mb-process.c: 147: mb_error_e mb_slave_process_write_multiple_coils(mb_packet_s* Packet)
+                                    668 ;	-----------------------------------------
+                                    669 ;	 function mb_slave_process_write_multiple_coils
+                                    670 ;	-----------------------------------------
+      000366                        671 _mb_slave_process_write_multiple_coils:
+      000366 52 21            [ 2]  672 	sub	sp, #33
+                                    673 ;	lib\modbus\mb-process.c: 152: Start=Packet->u16_1;
+      000368 1F 1E            [ 2]  674 	ldw	(0x1e, sp), x
+      00036A 1C 00 03         [ 2]  675 	addw	x, #0x0003
+      00036D 1F 10            [ 2]  676 	ldw	(0x10, sp), x
+      00036F FE               [ 2]  677 	ldw	x, (x)
+      000370 51               [ 1]  678 	exgw	x, y
+                                    679 ;	lib\modbus\mb-process.c: 153: End=(uint32_t)Packet->u16_2+Start;
+      000371 1E 1E            [ 2]  680 	ldw	x, (0x1e, sp)
+      000373 1C 00 05         [ 2]  681 	addw	x, #0x0005
+      000376 1F 12            [ 2]  682 	ldw	(0x12, sp), x
+      000378 FE               [ 2]  683 	ldw	x, (x)
+      000379 4F               [ 1]  684 	clr	a
+      00037A 0F 01            [ 1]  685 	clr	(0x01, sp)
+      00037C 17 18            [ 2]  686 	ldw	(0x18, sp), y
+      00037E 0F 17            [ 1]  687 	clr	(0x17, sp)
+      000380 0F 16            [ 1]  688 	clr	(0x16, sp)
+      000382 72 FB 18         [ 2]  689 	addw	x, (0x18, sp)
+      000385 19 17            [ 1]  690 	adc	a, (0x17, sp)
+      000387 6B 1B            [ 1]  691 	ld	(0x1b, sp), a
+      000389 7B 01            [ 1]  692 	ld	a, (0x01, sp)
+      00038B 19 16            [ 1]  693 	adc	a, (0x16, sp)
+      00038D 1F 16            [ 2]  694 	ldw	(0x16, sp), x
+      00038F 6B 14            [ 1]  695 	ld	(0x14, sp), a
+      000391 7B 1B            [ 1]  696 	ld	a, (0x1b, sp)
+      000393 6B 15            [ 1]  697 	ld	(0x15, sp), a
+                                    698 ;	lib\modbus\mb-process.c: 155: for(i=0;Start<End;Start++,i++)
+      000395 1E 1E            [ 2]  699 	ldw	x, (0x1e, sp)
+      000397 1F 18            [ 2]  700 	ldw	(0x18, sp), x
+      000399 5F               [ 1]  701 	clrw	x
+      00039A 1F 20            [ 2]  702 	ldw	(0x20, sp), x
+      00039C                        703 00105$:
+      00039C 93               [ 1]  704 	ldw	x, y
+      00039D 4F               [ 1]  705 	clr	a
+      00039E 0F 1A            [ 1]  706 	clr	(0x1a, sp)
+      0003A0 88               [ 1]  707 	push	a
+      0003A1 13 17            [ 2]  708 	cpw	x, (0x17, sp)
+      0003A3 84               [ 1]  709 	pop	a
+      0003A4 12 15            [ 1]  710 	sbc	a, (0x15, sp)
+      0003A6 7B 1A            [ 1]  711 	ld	a, (0x1a, sp)
+      0003A8 12 14            [ 1]  712 	sbc	a, (0x14, sp)
+      0003AA 24 39            [ 1]  713 	jrnc	00101$
+                                    714 ;	lib\modbus\mb-process.c: 157: mb_table_write_bit(TBALE_Coils,Start,((Packet->Data[i/8])>>(i%8))&0x01);
+      0003AC 1E 18            [ 2]  715 	ldw	x, (0x18, sp)
+      0003AE EE 08            [ 2]  716 	ldw	x, (0x8, x)
+      0003B0 1F 1A            [ 2]  717 	ldw	(0x1a, sp), x
+      0003B2 1E 20            [ 2]  718 	ldw	x, (0x20, sp)
+      0003B4 1F 1C            [ 2]  719 	ldw	(0x1c, sp), x
+      0003B6 54               [ 2]  720 	srlw	x
+      0003B7 54               [ 2]  721 	srlw	x
+      0003B8 54               [ 2]  722 	srlw	x
+      0003B9 72 FB 1A         [ 2]  723 	addw	x, (0x1a, sp)
+      0003BC F6               [ 1]  724 	ld	a, (x)
+      0003BD 97               [ 1]  725 	ld	xl, a
+      0003BE 7B 1D            [ 1]  726 	ld	a, (0x1d, sp)
+      0003C0 A4 07            [ 1]  727 	and	a, #0x07
+      0003C2 95               [ 1]  728 	ld	xh, a
+      0003C3 4D               [ 1]  729 	tnz	a
+      0003C4 27 06            [ 1]  730 	jreq	00127$
+      0003C6                        731 00126$:
+      0003C6 41               [ 1]  732 	exg	a, xl
+      0003C7 44               [ 1]  733 	srl	a
+      0003C8 41               [ 1]  734 	exg	a, xl
+      0003C9 4A               [ 1]  735 	dec	a
+      0003CA 26 FA            [ 1]  736 	jrne	00126$
+      0003CC                        737 00127$:
+      0003CC 9F               [ 1]  738 	ld	a, xl
+      0003CD A4 01            [ 1]  739 	and	a, #0x01
+      0003CF 90 89            [ 2]  740 	pushw	y
+      0003D1 88               [ 1]  741 	push	a
+      0003D2 90 89            [ 2]  742 	pushw	y
+      0003D4 AEr00r00         [ 2]  743 	ldw	x, #(_TBALE_Coils+0)
+      0003D7 CDr00r00         [ 4]  744 	call	_mb_table_write_bit
+      0003DA 90 85            [ 2]  745 	popw	y
+                                    746 ;	lib\modbus\mb-process.c: 155: for(i=0;Start<End;Start++,i++)
+      0003DC 90 5C            [ 1]  747 	incw	y
+      0003DE 1E 20            [ 2]  748 	ldw	x, (0x20, sp)
+      0003E0 5C               [ 1]  749 	incw	x
+      0003E1 1F 20            [ 2]  750 	ldw	(0x20, sp), x
+      0003E3 20 B7            [ 2]  751 	jra	00105$
+      0003E5                        752 00101$:
+                                    753 ;	lib\modbus\mb-process.c: 160: mb_packet_s tmpPacket = {0};
+      0003E5 0F 05            [ 1]  754 	clr	(0x05, sp)
+      0003E7 0F 06            [ 1]  755 	clr	(0x06, sp)
+      0003E9 0F 07            [ 1]  756 	clr	(0x07, sp)
+      0003EB 5F               [ 1]  757 	clrw	x
+      0003EC 1F 08            [ 2]  758 	ldw	(0x08, sp), x
+      0003EE 5F               [ 1]  759 	clrw	x
+      0003EF 1F 0A            [ 2]  760 	ldw	(0x0a, sp), x
+      0003F1 0F 0C            [ 1]  761 	clr	(0x0c, sp)
+      0003F3 5F               [ 1]  762 	clrw	x
+      0003F4 1F 0D            [ 2]  763 	ldw	(0x0d, sp), x
+      0003F6 0F 0F            [ 1]  764 	clr	(0x0f, sp)
+                                    765 ;	lib\modbus\mb-process.c: 161: mb_packet_response_write_multiple_coils(&tmpPacket,Packet->u16_1,Packet->u16_2);
+      0003F8 1E 12            [ 2]  766 	ldw	x, (0x12, sp)
+      0003FA FE               [ 2]  767 	ldw	x, (x)
+      0003FB 16 10            [ 2]  768 	ldw	y, (0x10, sp)
+      0003FD 90 FE            [ 2]  769 	ldw	y, (y)
+      0003FF 89               [ 2]  770 	pushw	x
+      000400 90 89            [ 2]  771 	pushw	y
+      000402 96               [ 1]  772 	ldw	x, sp
+      000403 1C 00 09         [ 2]  773 	addw	x, #9
+      000406 CDr00r00         [ 4]  774 	call	_mb_packet_response_write_multiple_coils
+                                    775 ;	lib\modbus\mb-process.c: 163: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      000409 1E 1E            [ 2]  776 	ldw	x, (0x1e, sp)
+      00040B F6               [ 1]  777 	ld	a, (x)
+      00040C 27 07            [ 1]  778 	jreq	00103$
+                                    779 ;	lib\modbus\mb-process.c: 165: mb_tx_packet_handler(&tmpPacket);
+      00040E 96               [ 1]  780 	ldw	x, sp
+      00040F 1C 00 05         [ 2]  781 	addw	x, #5
+      000412 CDr00r00         [ 4]  782 	call	_mb_tx_packet_handler
+      000415                        783 00103$:
+                                    784 ;	lib\modbus\mb-process.c: 166: return MB_OK;
+      000415 4F               [ 1]  785 	clr	a
+                                    786 ;	lib\modbus\mb-process.c: 167: }
+      000416 5B 21            [ 2]  787 	addw	sp, #33
+      000418 81               [ 4]  788 	ret
+                                    789 ;	lib\modbus\mb-process.c: 169: mb_error_e mb_slave_process_write_multiple_register(mb_packet_s* Packet)
+                                    790 ;	-----------------------------------------
+                                    791 ;	 function mb_slave_process_write_multiple_register
+                                    792 ;	-----------------------------------------
+      000419                        793 _mb_slave_process_write_multiple_register:
+      000419 52 1D            [ 2]  794 	sub	sp, #29
+                                    795 ;	lib\modbus\mb-process.c: 174: Start=Packet->u16_1;
+      00041B 1F 1C            [ 2]  796 	ldw	(0x1c, sp), x
+      00041D 1C 00 03         [ 2]  797 	addw	x, #0x0003
+      000420 1F 0C            [ 2]  798 	ldw	(0x0c, sp), x
+      000422 FE               [ 2]  799 	ldw	x, (x)
+      000423 51               [ 1]  800 	exgw	x, y
+                                    801 ;	lib\modbus\mb-process.c: 175: End=(uint32_t)Packet->u16_2+Start;
+      000424 1E 1C            [ 2]  802 	ldw	x, (0x1c, sp)
+      000426 1C 00 05         [ 2]  803 	addw	x, #0x0005
+      000429 1F 0E            [ 2]  804 	ldw	(0x0e, sp), x
+      00042B FE               [ 2]  805 	ldw	x, (x)
+      00042C 4F               [ 1]  806 	clr	a
+      00042D 0F 10            [ 1]  807 	clr	(0x10, sp)
+      00042F 17 16            [ 2]  808 	ldw	(0x16, sp), y
+      000431 0F 15            [ 1]  809 	clr	(0x15, sp)
+      000433 0F 14            [ 1]  810 	clr	(0x14, sp)
+      000435 72 FB 16         [ 2]  811 	addw	x, (0x16, sp)
+      000438 19 15            [ 1]  812 	adc	a, (0x15, sp)
+      00043A 6B 19            [ 1]  813 	ld	(0x19, sp), a
+      00043C 7B 10            [ 1]  814 	ld	a, (0x10, sp)
+      00043E 19 14            [ 1]  815 	adc	a, (0x14, sp)
+      000440 1F 12            [ 2]  816 	ldw	(0x12, sp), x
+      000442 6B 10            [ 1]  817 	ld	(0x10, sp), a
+      000444 7B 19            [ 1]  818 	ld	a, (0x19, sp)
+      000446 6B 11            [ 1]  819 	ld	(0x11, sp), a
+                                    820 ;	lib\modbus\mb-process.c: 177: for(i=0;Start<End;Start++,i+=2)
+      000448 5F               [ 1]  821 	clrw	x
+      000449 1F 1A            [ 2]  822 	ldw	(0x1a, sp), x
+      00044B 1E 1C            [ 2]  823 	ldw	x, (0x1c, sp)
+      00044D 1F 14            [ 2]  824 	ldw	(0x14, sp), x
+      00044F                        825 00105$:
+      00044F 93               [ 1]  826 	ldw	x, y
+      000450 4F               [ 1]  827 	clr	a
+      000451 0F 16            [ 1]  828 	clr	(0x16, sp)
+      000453 88               [ 1]  829 	push	a
+      000454 13 13            [ 2]  830 	cpw	x, (0x13, sp)
+      000456 84               [ 1]  831 	pop	a
+      000457 12 11            [ 1]  832 	sbc	a, (0x11, sp)
+      000459 7B 16            [ 1]  833 	ld	a, (0x16, sp)
+      00045B 12 10            [ 1]  834 	sbc	a, (0x10, sp)
+      00045D 24 33            [ 1]  835 	jrnc	00101$
+                                    836 ;	lib\modbus\mb-process.c: 179: Temp=(Packet->Data[i]<<8)|(Packet->Data[i+1]);
+      00045F 1E 14            [ 2]  837 	ldw	x, (0x14, sp)
+      000461 EE 08            [ 2]  838 	ldw	x, (0x8, x)
+      000463 1F 16            [ 2]  839 	ldw	(0x16, sp), x
+      000465 72 FB 1A         [ 2]  840 	addw	x, (0x1a, sp)
+      000468 F6               [ 1]  841 	ld	a, (x)
+      000469 6B 18            [ 1]  842 	ld	(0x18, sp), a
+      00046B 0F 19            [ 1]  843 	clr	(0x19, sp)
+      00046D 1E 1A            [ 2]  844 	ldw	x, (0x1a, sp)
+      00046F 5C               [ 1]  845 	incw	x
+      000470 72 FB 16         [ 2]  846 	addw	x, (0x16, sp)
+      000473 F6               [ 1]  847 	ld	a, (x)
+      000474 5F               [ 1]  848 	clrw	x
+      000475 1A 19            [ 1]  849 	or	a, (0x19, sp)
+      000477 02               [ 1]  850 	rlwa	x
+      000478 1A 18            [ 1]  851 	or	a, (0x18, sp)
+      00047A 95               [ 1]  852 	ld	xh, a
+                                    853 ;	lib\modbus\mb-process.c: 180: mb_table_write(TABLE_Holding_Registers,Start,Temp);
+      00047B 90 89            [ 2]  854 	pushw	y
+      00047D 89               [ 2]  855 	pushw	x
+      00047E 90 89            [ 2]  856 	pushw	y
+      000480 AEr00r00         [ 2]  857 	ldw	x, #(_TABLE_Holding_Registers+0)
+      000483 CDr00r00         [ 4]  858 	call	_mb_table_write
+      000486 90 85            [ 2]  859 	popw	y
+                                    860 ;	lib\modbus\mb-process.c: 177: for(i=0;Start<End;Start++,i+=2)
+      000488 90 5C            [ 1]  861 	incw	y
+      00048A 1E 1A            [ 2]  862 	ldw	x, (0x1a, sp)
+      00048C 5C               [ 1]  863 	incw	x
+      00048D 5C               [ 1]  864 	incw	x
+      00048E 1F 1A            [ 2]  865 	ldw	(0x1a, sp), x
+      000490 20 BD            [ 2]  866 	jra	00105$
+      000492                        867 00101$:
+                                    868 ;	lib\modbus\mb-process.c: 183: mb_packet_s tmpPacket = {0};
+      000492 0F 01            [ 1]  869 	clr	(0x01, sp)
+      000494 0F 02            [ 1]  870 	clr	(0x02, sp)
+      000496 0F 03            [ 1]  871 	clr	(0x03, sp)
+      000498 5F               [ 1]  872 	clrw	x
+      000499 1F 04            [ 2]  873 	ldw	(0x04, sp), x
+      00049B 5F               [ 1]  874 	clrw	x
+      00049C 1F 06            [ 2]  875 	ldw	(0x06, sp), x
+      00049E 0F 08            [ 1]  876 	clr	(0x08, sp)
+      0004A0 5F               [ 1]  877 	clrw	x
+      0004A1 1F 09            [ 2]  878 	ldw	(0x09, sp), x
+      0004A3 0F 0B            [ 1]  879 	clr	(0x0b, sp)
+                                    880 ;	lib\modbus\mb-process.c: 184: mb_packet_response_write_multiple_registers(&tmpPacket,Packet->u16_1,Packet->u16_2);
+      0004A5 1E 0E            [ 2]  881 	ldw	x, (0x0e, sp)
+      0004A7 FE               [ 2]  882 	ldw	x, (x)
+      0004A8 16 0C            [ 2]  883 	ldw	y, (0x0c, sp)
+      0004AA 90 FE            [ 2]  884 	ldw	y, (y)
+      0004AC 89               [ 2]  885 	pushw	x
+      0004AD 90 89            [ 2]  886 	pushw	y
+      0004AF 96               [ 1]  887 	ldw	x, sp
+      0004B0 1C 00 05         [ 2]  888 	addw	x, #5
+      0004B3 CDr00r00         [ 4]  889 	call	_mb_packet_response_write_multiple_registers
+                                    890 ;	lib\modbus\mb-process.c: 186: if(Packet->device_address != MB_BROADCAST_ADDRESS)
+      0004B6 1E 1C            [ 2]  891 	ldw	x, (0x1c, sp)
+      0004B8 F6               [ 1]  892 	ld	a, (x)
+      0004B9 27 05            [ 1]  893 	jreq	00103$
+                                    894 ;	lib\modbus\mb-process.c: 188: mb_tx_packet_handler(&tmpPacket);
+      0004BB 96               [ 1]  895 	ldw	x, sp
+      0004BC 5C               [ 1]  896 	incw	x
+      0004BD CDr00r00         [ 4]  897 	call	_mb_tx_packet_handler
+      0004C0                        898 00103$:
+                                    899 ;	lib\modbus\mb-process.c: 189: return MB_OK;
+      0004C0 4F               [ 1]  900 	clr	a
+                                    901 ;	lib\modbus\mb-process.c: 190: }
+      0004C1 5B 1D            [ 2]  902 	addw	sp, #29
+      0004C3 81               [ 4]  903 	ret
+                                    904 	.area CODE
+                                    905 	.area CONST
+                                    906 	.area INITIALIZER
+                                    907 	.area CABS (ABS)
