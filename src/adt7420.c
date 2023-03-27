@@ -37,10 +37,6 @@ t_adt7420_status adt7420_init()
   
     //Инициализация RTC. Читаем 0-й регистр
     status = i2c_rd_reg(ADT7420_SLAVE_ADDR, ADT7420_ID, (uint8_t*) &data, 1);
-
-    if (data != 0xCB) {
-      status = I2C_ERROR;
-    }
     
     //Проверка состояния выполнении операции по I2C
     adt7420_check_error(status);
@@ -49,6 +45,10 @@ t_adt7420_status adt7420_init()
     // if(data.ch){
     //   //Сброс даты и времени
     //   return ds1307_reset(time_mode);
+    // }
+
+    // if (data != 0xCB) {
+    //   status = I2C_ERROR;
     // }
   
     return ADT7420_SUCCESS;

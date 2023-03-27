@@ -28,19 +28,21 @@ int main(void)
     GPIOInit();
     UART1Init();
     i2c_master_init(F_MASTER_HZ, F_I2C_HZ);
+
+    uint8_t tmp[1] = {0};
     if (adt7420_init() != ADT7420_SUCCESS) {
       // while (1);
+      tmp[0] = 0xFF;
     }
     
     mb_slave_address_set(SLAVE_DEVICE_ID);
     mb_set_tx_handler(&Uart1_SendNByte);
 
-    // mb_table_write(TABLE_Holding_Registers, 0, 456);
+    // mb_table_write(TABLE_Holding_Registers, 0, 123);
 
     enableInterrupts();
-
     while (1) {
-      Uart1_SendNByte("123\n", 4);
+      Uart1_SendNByte(tmp, 1);
       // sprintf(tmp, "%d\n", ADT7420_get_tempr());
       // Uart1_SendNByte(tmp, strlen(tmp));
     }
@@ -65,8 +67,8 @@ static void SystemClockInit(void)
   CLK->HSITRIMR = CLK_HSITRIMR_RESET_VALUE;
   CLK->SWIMCCR = CLK_SWIMCCR_RESET_VALUE;
 
-  // HSI prescaler
-  CLK->CKDIVR |= (uint8_t)(SENSOR_CLK_DIVIDER);
+  // HSI & CPU prescaler
+  CLK->CKDIVR |= (uint8_t)(SENSOR_CLK_DIVIDER) ;
   // Enable periph tick
   CLK->PCKENR1 |= (uint8_t)(CLK_PCKENR1_UART1);
   CLK->PCKENR1 |= (uint8_t)(CLK_PCKENR1_I2C);

@@ -8,20 +8,19 @@
 static unsigned long int i2c_timeout;
 
 //Задать таймаут в микросекундах
-#define set_tmo_us(time)\
-  i2c_timeout = (unsigned long int)(F_MASTER_MHZ * time)
+#define set_tmo_us(time)  i2c_timeout = (unsigned long int)(F_MASTER_MHZ * time)
 
 //Задать таймаут в миллисекундах
-#define set_tmo_ms(time)\
-  i2c_timeout = (unsigned long int)(F_MASTER_MHZ * time * 1000)
+#define set_tmo_ms(time)  i2c_timeout = (unsigned long int)(F_MASTER_MHZ * time * 1000UL)
 
 #define tmo               i2c_timeout--
 
 //Ожидание наступления события event
 //в течении времени timeout в мс
 #define wait_event(event, timeout) set_tmo_ms(timeout);\
-                                   while(event && i2c_timeout);\
+                                   while(event && --i2c_timeout);\
                                    if(!i2c_timeout) return I2C_TIMEOUT;
+
 
 //******************************************************************************
 // Инициализация I2C интерфейса      
@@ -44,18 +43,18 @@ void i2c_master_init(unsigned long f_master_hz, unsigned long f_i2c_hz)
   GPIOB->CR2 &= ~GPIO_PIN_5;
   
   //Частота тактирования периферии MHz
-  I2C->FREQR = 12;
+  I2C->FREQR = f_master_hz;
   //Отключаем I2C
   I2C->CR1 &= ~I2C_CR1_PE;
   //В стандартном режиме скорость I2C max = 100 кбит/с
   //Выбираем стандартный режим
   I2C->CCRH &= ~I2C_CCRH_FS;
   //CCR = Fmaster/2*Fiic= 12MHz/2*100kHz
-  ccr = f_master_hz / (2*f_i2c_hz);
+  ccr = f_master_hz / (2 * f_i2c_hz);
   //Set Maximum Rise Time: 1000ns max in Standard Mode
   //= [1000ns/(1/InputClockFrequencyMHz.10e6)]+1
   //= InputClockFrequencyMHz+1
-  I2C->TRISER |= 12+1;
+  I2C->TRISER |= (f_master_hz / 1000000) + 1;
   I2C->CCRL = ccr & 0xFF;
   I2C->CCRH |= (ccr >> 8) & 0x0F;
   //Включаем I2C
@@ -121,7 +120,7 @@ t_i2c_status i2c_rd_reg(unsigned char address, unsigned char reg_addr,
   
   //Ждем освобождения шины I2C
   wait_event(I2C->SR3 & I2C_SR3_BUSY, 10);
-    
+  
   //Разрешаем подтверждение в конце посылки
   I2C->CR2 |= I2C_CR2_ACK;
   
@@ -130,7 +129,6 @@ t_i2c_status i2c_rd_reg(unsigned char address, unsigned char reg_addr,
   
   //Ждем установки бита SB
   wait_event(!(I2C->SR1 & I2C_SR1_SB), 1);
-  
   //Записываем в регистр данных адрес ведомого устройства
   I2C->DR = address & 0xFE;
   //Ждем подтверждения передачи адреса

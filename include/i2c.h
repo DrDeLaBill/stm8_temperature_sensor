@@ -5,8 +5,8 @@
 #include "stm8s.h"
 
 
-#define F_MASTER_MHZ    2UL
-#define F_MASTER_HZ     2000000UL
+#define F_MASTER_MHZ    16UL
+#define F_MASTER_HZ     16000000UL
 
 
 //Результат выполнения операции с i2c
