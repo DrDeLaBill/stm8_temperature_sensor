@@ -1,11 +1,14 @@
 #include "main.h"
 
 #include <string.h>
+// #include <stdio.h>
 
 #include "stm8s.h"
 #include "stm8s_it.h"
 #include "mb.h"
 #include "mb-table.h"
+#include "i2c.h"
+#include "adt7420.h"
 
 
 CONST uint8_t HSIDivFactor[4] = {1, 2, 4, 8}; /*!< Holds the different HSI Divider factors */
@@ -15,27 +18,31 @@ static void SystemClockInit(void);
 static void GPIOInit(void);
 static void UART1Init(void);
 
-// void Uart1_RXIntrrupt();
 void Uart1_Putchar(uint8_t Ch);
 void Uart1_SendNByte(uint8_t* Data,uint8_t Len);
-uint32_t get_clock_freq();
+
 
 int main(void) 
 {
     SystemClockInit();
     GPIOInit();
     UART1Init();
+    i2c_master_init(F_MASTER_HZ, F_I2C_HZ);
+    if (adt7420_init() != ADT7420_SUCCESS) {
+      // while (1);
+    }
     
-    // mb_slave_address_set(SLAVE_DEVICE_ID);
-    // mb_set_tx_handler(&Uart1_SendNByte);
+    mb_slave_address_set(SLAVE_DEVICE_ID);
+    mb_set_tx_handler(&Uart1_SendNByte);
 
-    // mb_table_write(TBALE_Input_Registers,0,123);
-    // mb_table_write(TABLE_Holding_Registers,0,456);
+    // mb_table_write(TABLE_Holding_Registers, 0, 456);
 
     enableInterrupts();
 
     while (1) {
-      Uart1_SendNByte("123dgnmfdlkg\n", strlen("123dgnmfdlkg\n"));
+      Uart1_SendNByte("123\n", 4);
+      // sprintf(tmp, "%d\n", ADT7420_get_tempr());
+      // Uart1_SendNByte(tmp, strlen(tmp));
     }
 
     return 0;
@@ -75,7 +82,14 @@ static void GPIOInit(void)
   GPIOD->CR1 = GPIO_CR1_RESET_VALUE;
   GPIOD->CR2 = GPIO_CR2_RESET_VALUE;
 
-  // UART1
+  GPIOB->ODR = GPIO_ODR_RESET_VALUE;
+  GPIOB->DDR = GPIO_DDR_RESET_VALUE;
+  GPIOB->CR1 = GPIO_CR1_RESET_VALUE;
+  GPIOB->CR2 = GPIO_CR2_RESET_VALUE;
+}
+
+static void UART1Init(void)
+{
   GPIOD->DDR |= (uint8_t)(TX_PIN);
   GPIOD->DDR &= (uint8_t)(~RX_PIN);
   GPIOD->DDR |= (uint8_t)(MAX485_PIN);
@@ -83,13 +97,7 @@ static void GPIOInit(void)
   GPIOD->CR2 |= (uint8_t)(MAX485_PIN);
 
   GPIOD->ODR &= (uint8_t)(~MAX485_PIN);
-  // GPIOD->CR2 |= (uint8_t)(GPIO_PIN_6 & ~GPIO_PIN_5);
-  // I2C
 
-}
-
-static void UART1Init(void)
-{
   uint32_t BaudRate_Mantissa = 0, BaudRate_Mantissa100 = 0;
   uint32_t BaudRate = UART_BAUD_RATE;
 
@@ -169,6 +177,7 @@ uint32_t get_clock_freq()
 
 void Uart1_Putchar(uint8_t Ch)
 {
+
   GPIOD->ODR |= (uint8_t)(MAX485_PIN);
 
   UART1->DR = Ch;
