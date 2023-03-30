@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "stm8l.h": "c",
+        "adt7420.h": "c",
+        "main.h": "c",
+        "mb-table.h": "c",
+        "i2c.h": "c",
+        "mb.h": "c"
+    }
+}

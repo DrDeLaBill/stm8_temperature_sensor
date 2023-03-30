@@ -1,14 +1,17 @@
 #include "adt7420.h"
 
+#include "stm8l.h"
+#include "i2c.h"
+
+
 //******************************************************************************
 //Функция выдачи состояния выполнения операции adt7420 на основе состояния
 //выполнения операции с I2C
 //******************************************************************************
-static t_adt7420_status adt7420_i2c_error(t_i2c_status status){
-    if(status != I2C_SUCCESS){
+t_adt7420_status adt7420_i2c_error(i2c_status status){
+    if(status != I2C_OK){
       switch(status){
-        case I2C_TIMEOUT:  return ADT7420_TIMEOUT; break;
-        case I2C_ERROR:    return ADT7420_ERROR;   break;
+        case I2C_TMOUT:  return ADT7420_TIMEOUT; break;
         default:           return ADT7420_ERROR;   break;
       }
     } else {
@@ -19,9 +22,13 @@ static t_adt7420_status adt7420_i2c_error(t_i2c_status status){
 //******************************************************************************
 //Проверка на наличие ошибок выполнения операции I2C
 //******************************************************************************
-#define adt7420_check_error(i2c_status)\
-  if(i2c_status != I2C_SUCCESS)\
-    return adt7420_i2c_error(i2c_status)
+t_adt7420_status adt7420_check_error(i2c_status status) 
+{
+  if(status != I2C_OK) {
+    return adt7420_i2c_error(status);
+  }
+  return ADT7420_SUCCESS;
+}
 
 
 //******************************************************************************
@@ -29,29 +36,27 @@ static t_adt7420_status adt7420_i2c_error(t_i2c_status status){
 //******************************************************************************      
 t_adt7420_status adt7420_init()
 {
-    //Состояние выполнения операции I2C
-    t_i2c_status status = I2C_SUCCESS;
-    
-    //Переменная для хранения прочитанных данных
-    uint8_t data;
-  
-    //Инициализация RTC. Читаем 0-й регистр
-    status = i2c_rd_reg(ADT7420_SLAVE_ADDR, ADT7420_ID, (uint8_t*) &data, 1);
-    
-    //Проверка состояния выполнении операции по I2C
-    adt7420_check_error(status);
-    
-    //Если работа часов запрещена, то разрешаем сбросом CH=0
-    // if(data.ch){
-    //   //Сброс даты и времени
-    //   return ds1307_reset(time_mode);
-    // }
+    i2c_setup();
+    i2c_set_addr7(ADT7420_SLAVE_ADDR); 
+    return si7005_available();
+}
 
-    // if (data != 0xCB) {
-    //   status = I2C_ERROR;
-    // }
-  
-    return ADT7420_SUCCESS;
+//******************************************************************************
+//read device ID
+//******************************************************************************
+t_adt7420_status si7005_available() {
+  uint8_t resp = 0;
+  i2c_status status = i2c_7bit_send_onebyte(ADT7420_ID, 0);
+
+  if(status == I2C_OK){
+    status = i2c_7bit_receive_onebyte(&resp,0);
+  }
+
+  if ((resp & 0xF0) != 0xC0) {
+    return ADT7420_ERROR;
+  }
+
+  return adt7420_check_error(status);
 }
 
 //******************************************************************************
@@ -59,20 +64,19 @@ t_adt7420_status adt7420_init()
 //******************************************************************************
 t_adt7420_status adt7420_get_temperature(int16_t* value)
 {
-  //Состояние выполнения операции I2C
-  t_i2c_status status = I2C_SUCCESS;
-
-  uint8_t data[2] = {0};
-
   //Чтение регистров adt7420
-  status = i2c_rd_reg(ADT7420_SLAVE_ADDR, ADT7420_MOST_SIGNIFICANT_BYTE, (uint8_t*)&data, sizeof(data));
+  uint8_t resp;
+  i2c_status status = i2c_7bit_send_onebyte(ADT7420_MOST_SIGNIFICANT_BYTE, 0);
 
-  //Проверка состояния выполнении операции по I2C
-  adt7420_check_error(status);
+  if(status == I2C_OK){
+    status = i2c_7bit_receive_onebyte(&resp,0);
+  }
 
-  int16_t sign = (data[0] & 0b10000000) ? (-1) : 1;
-  value = sign * (data[0] & 0b01111111);
+  if(status == I2C_OK){
+    int16_t sign = (resp & 0b10000000) ? (-1) : 1;
+    *value = sign * (resp & 0b01111111);
+  }
   
-  return ADT7420_SUCCESS;
+  return adt7420_check_error(status);
 }
 

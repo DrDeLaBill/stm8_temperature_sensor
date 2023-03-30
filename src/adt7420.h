@@ -1,9 +1,11 @@
 #ifndef _ADT7420_H_
 #define _ADT7420_H_
 
+#include <stdint.h>
 
 #include "i2c.h"
 #include "main.h"
+
 
 //******************************************************************************
 //Параметры ADT7420
@@ -44,6 +46,7 @@ typedef enum {
 //******************************************************************************
 extern t_adt7420_status adt7420_init();
 extern t_adt7420_status adt7420_get_temperature(int16_t* value);
+extern t_adt7420_status si7005_available();
 
 //******************************************************************************
 // Макросы
