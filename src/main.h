@@ -76,6 +76,7 @@
 #define SLAVE_DEVICE_ID    0x01
 
 
+void uart1_send_byte(uint8_t* Data,uint8_t Len);
 uint32_t get_clock_freq();
 
 

@@ -72,8 +72,9 @@ t_adt7420_status adt7420_get_temperature(int16_t* value)
     status = i2c_7bit_receive_onebyte(&resp,0);
   }
 
+  int8_t sign = +1;
   if(status == I2C_OK){
-    int16_t sign = (resp & 0b10000000) ? (-1) : 1;
+    sign = (resp & 0b10000000) ? (-1) : 1;
     *value = sign * (resp & 0b01111111);
   }
   
