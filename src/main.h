@@ -74,6 +74,12 @@
 #define F_I2C_HZ           100000UL
 // Sensor
 #define SLAVE_DEVICE_ID    0x01
+// Modbus
+#define MODBUS_DELAY       1000
+
+
+extern uint32_t mb_start_time;
+extern uint32_t Global_time;
 
 
 void uart1_send_byte(uint8_t* Data,uint8_t Len);

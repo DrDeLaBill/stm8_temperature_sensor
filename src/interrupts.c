@@ -64,8 +64,8 @@ INTERRUPT_HANDLER(CAN_TX_IRQHandler, 9){}
 INTERRUPT_HANDLER(SPI_IRQHandler, 10){}
 
 // Timer1 Update/Overflow/Trigger/Break Interrupt
-INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11){
-}
+// INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11){
+// }
 
 // Timer1 Capture/Compare Interrupt routine.
 INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12){}

@@ -95,4 +95,5 @@ void uart1_send_byte(uint8_t* Data,uint8_t Len)
 INTERRUPT_DEFINITION(UART1_RX_IRQHandler, 18)
 {
   mb_rx_new_data((uint8_t)UART1_DR);
+  mb_start_time = Global_time;
 }
