@@ -37,7 +37,7 @@ int main(void)
     uint8_t reg_counter = 0;
     mb_start_time = Global_time;
     for (uint8_t i = 0; i < TABLE_Holding_Registers_Size; i++) {
-      mb_table_write(TABLE_Holding_Registers, i + 100, 123);
+      mb_table_write(TABLE_Holding_Registers, i, 100 + i);
     }
     while (1) {
       if (ABS(Global_time, mb_start_time) > MODBUS_DELAY) {
