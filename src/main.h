@@ -34,7 +34,10 @@
 #define CLK_ICKR_HSIRDY      ((uint8_t)0x02) /*!< High speed internal RC oscillator ready */
 #define CLK_ICKR_HSIEN       ((uint8_t)0x01) /*!< High speed internal RC oscillator enable */
 #define CLK_CKDIVR_HSIDIV    ((uint8_t)0x18) /*!< High speed internal clock prescaler */
+#define CLK_SWCR_SWEN        ((uint8_t)0x02) /*!< Switch start/stop */
+#define CLK_SWCR_SWBSY       ((uint8_t)0x01) /*!< Switch busy flag*/
 #define HSI_VALUE            ((uint32_t)16000000) /*!< Typical Value of the HSI in Hz */
+
 // GPIO
 #define GPIO_ODR_RESET_VALUE ((uint8_t)0x00)
 #define GPIO_DDR_RESET_VALUE ((uint8_t)0x00)

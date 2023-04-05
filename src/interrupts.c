@@ -21,6 +21,14 @@
 
 #include "interrupts.h"
 
+#include <stdint.h>
+
+#include "stm8l.h"
+#include "main.h"
+#include "modbus/mb.h"
+#include "uart.h"
+
+
 // Top Level Interrupt
 INTERRUPT_HANDLER(TLI_IRQHandler, 0){}
 
@@ -64,8 +72,7 @@ INTERRUPT_HANDLER(CAN_TX_IRQHandler, 9){}
 INTERRUPT_HANDLER(SPI_IRQHandler, 10){}
 
 // Timer1 Update/Overflow/Trigger/Break Interrupt
-// INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11){
-// }
+INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11){}
 
 // Timer1 Capture/Compare Interrupt routine.
 INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12){}
@@ -80,38 +87,17 @@ INTERRUPT_HANDLER(TIM5_CAP_COM_IRQHandler, 14){}
 #else // STM8S208, STM8S207, STM8S105 or STM8S103 or STM8AF62Ax or STM8AF52Ax or STM8AF626x
 
 // Timer2 Update/Overflow/Break Interrupt
-INTERRUPT_HANDLER(TIM2_UPD_OVF_BRK_IRQHandler, 13){
+INTERRUPT_HANDLER(TIM2_UPD_OVF_BRK_IRQHandler, 13) {
+    if (TIM2_SR1 & TIM_SR1_UIF) { // update interrupt
+        Global_time++; // increase timer
+    }
+	PD_ODR ^= (uint8_t)(MAX485_PIN);
+    TIM2_SR1 &= ~(TIM_SR1_UIF); // clear all interrupt flag
 }
 
 // Timer2 Capture/Compare Interrupt
 // manage with sending/receiving
 INTERRUPT_HANDLER(TIM2_CAP_COM_IRQHandler, 14){
-/*	TIM2_SR1 &= ~TIM_SR1_CC1IF;
-	onewire_gotlen = TIM2_CCR1H << 8;
-	onewire_gotlen |= TIM2_CCR1L;
-	if(onewire_tick_ctr){ // there's some more data to transmit / receive
-		--onewire_tick_ctr;
-		if(is_receiver){// receive bits
-			ow_data >>= 1;
-			if(onewire_gotlen < ONE_ZERO_BARRIER){ // this is 1
-				ow_data |= 0x80; // LSbit first!
-			}
-			// in receiver mode we don't need to send byte after ctr is zero!
-			if(onewire_tick_ctr == 0){
-				TIM2_CR1 &= ~TIM_CR1_CEN;
-			}
-		}else{// transmit bits
-			// update CCR2 registers with new values
-			if(ow_data & 1){ // transmit 1
-				TIM2REG(CCR2, BIT_ONE_P);
-			}else{ // transmit 0
-				TIM2REG(CCR2, BIT_ZERO_P);
-			}
-			ow_data >>= 1;
-		}
-	}else{ // end: turn off timer
-		TIM2_CR1 &= ~TIM_CR1_CEN;
-	}*/
 }
 #endif // STM8S903
 
@@ -130,7 +116,10 @@ INTERRUPT_HANDLER(TIM3_CAP_COM_IRQHandler, 16){}
 INTERRUPT_HANDLER(UART1_TX_IRQHandler, 17){}
 
 // UART1 RX Interrupt
-// INTERRUPT_HANDLER(UART1_RX_IRQHandler, 18){}
+INTERRUPT_HANDLER(UART1_RX_IRQHandler, 18){
+  mb_rx_new_data((uint8_t)UART1_DR);
+  mb_start_time = Global_time;
+}
 #endif // STM8S208 or STM8S207 or STM8S103 or STM8S903 or STM8AF62Ax or STM8AF52Ax
 
 
