@@ -29,6 +29,7 @@
 #define CLK_SWIMCCR_RESET_VALUE  ((uint8_t)0x00)
 
 #define CLK_CCOR_CCOEN       ((uint8_t)0x01) /*!< Configurable clock output enable */
+#define CLK_PCKENR1_TIM1     ((uint8_t)0x80) /*!< Timer 1 clock enable */ 
 #define CLK_PCKENR1_UART1    ((uint8_t)0x04) /*!< UART1 clock enable */
 #define CLK_PCKENR1_I2C      ((uint8_t)0x01) /*!< I2C clock enable */
 #define CLK_ICKR_HSIRDY      ((uint8_t)0x02) /*!< High speed internal RC oscillator ready */

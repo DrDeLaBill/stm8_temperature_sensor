@@ -22,13 +22,13 @@ void tim2_init();
 
 int main(void) 
 {
+    enableInterrupts();
     system_clock_init();
     tim2_init();
     gpio_init();
     uart1_init();
     adt7420_init();
 
-    enableInterrupts();
     
     mb_slave_address_set(SLAVE_DEVICE_ID);
     mb_set_tx_handler(&uart1_send_byte);
@@ -42,7 +42,7 @@ int main(void)
     uint8_t i = 0;
     char str[2] = "1\n";
     while (1) {
-      if (ABS(Global_time, mb_start_time) > MODBUS_DELAY) {
+      if (ABS_DIF(Global_time, mb_start_time) > MODBUS_DELAY) {
         mb_rx_timeout_handler();
       }
       str[0] = '0' + (char)Global_time;
@@ -76,12 +76,11 @@ void system_clock_init()
   CLK_SWIMCCR = CLK_SWIMCCR_RESET_VALUE;
 
   // HSI & CPU prescaler
-  CLK_CKDIVR |= (uint8_t)(SENSOR_CLK_DIVIDER) ;
+  CLK_CKDIVR |= (uint8_t)(SENSOR_CLK_DIVIDER);
   // Enable periph tick
   CLK_SPCKENR1 |= (uint8_t)(CLK_PCKENR1_UART1);
   CLK_SPCKENR1 |= (uint8_t)(CLK_PCKENR1_I2C);
-  CLK_SPCKENR1 = 0xFF;
-  CLK_PCKENR2  = 0xFF;
+  CLK_SPCKENR1 |= (uint8_t)(CLK_PCKENR1_TIM1);
 
   // HSI enable
   CLK_ICKR |= (uint8_t)(CLK_ICKR_HSIEN);
@@ -106,22 +105,21 @@ void gpio_init()
 
 void tim2_init()
 {
-   // TIM1 - system timer (1ms)
-  // TIM1_PSCRH = 0x00;
-	// TIM1_PSCRL = 0x03; // LSB should be written last as it updates prescaler
-	// // auto-reload each 1ms: TIM_ARR = 1000 = 0x03E8
-	// TIM1_ARRH = 0x03;
-	// TIM1_ARRL = 0xE8;
-	// // interrupts: update
-	// TIM1_IER = TIM_IER_UIE;
-	// // auto-reload + interrupt on overflow + enable
-	// TIM1_CR1 = TIM_CR1_APRE | TIM_CR1_URS | TIM_CR1_CEN;
+  // TIM1 - system timer (1ms)
+	TIM3_PSCR = 0x04; // LSB should be written last as it updates prescaler
+	// auto-reload each 1ms: TIM_ARR = 1000 = 0x03E8
+	TIM2_ARRH = 0x03;
+	TIM2_ARRL = 0xE8;
+	// interrupts: update
+	TIM2_IER = TIM_IER_UIE;
+	// auto-reload + interrupt on overflow + enable
+	TIM2_CR1 = TIM_CR1_APRE | TIM_CR1_URS | TIM_CR1_CEN;
 
-  TIM2_PSCR = 0x04;
-  TIM2_ARRH = 0x03;
-  TIM2_ARRL = 0xE8;
-  TIM2_IER = TIM_IER_UIE;
-  TIM2_CR1 = TIM_CR1_APRE | TIM_CR1_CEN;
+  // TIM3_PSCR = 0x04;
+  // TIM3_ARRH = 0x03;
+  // TIM3_ARRL = 0xE8;
+  // TIM3_IER = TIM_IER_UIE;
+  // TIM3_CR1 = TIM_CR1_APRE | TIM_CR1_CEN;
 }
 
 uint32_t get_clock_freq()

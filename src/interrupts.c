@@ -90,15 +90,16 @@ INTERRUPT_HANDLER(TIM5_CAP_COM_IRQHandler, 14){}
 INTERRUPT_HANDLER(TIM2_UPD_OVF_BRK_IRQHandler, 13) {
     if (TIM2_SR1 & TIM_SR1_UIF) { // update interrupt
         Global_time++; // increase timer
+		if (Global_time >= 10) {
+			Global_time = 0;
+		}
     }
-	PD_ODR ^= (uint8_t)(MAX485_PIN);
     TIM2_SR1 &= ~(TIM_SR1_UIF); // clear all interrupt flag
 }
 
 // Timer2 Capture/Compare Interrupt
 // manage with sending/receiving
-INTERRUPT_HANDLER(TIM2_CAP_COM_IRQHandler, 14){
-}
+INTERRUPT_HANDLER(TIM2_CAP_COM_IRQHandler, 14){}
 #endif // STM8S903
 
 #if defined (STM8S208) || defined(STM8S207) || defined(STM8S007) || defined(STM8S105) || \
