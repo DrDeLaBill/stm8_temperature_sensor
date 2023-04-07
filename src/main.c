@@ -60,6 +60,7 @@ int main(void)
 
 void system_clock_init()
 {
+  STM8S103;
   // CLK deinit
   CLK_ICKR = CLK_ICKR_RESET_VALUE;
   CLK_ECKR = CLK_ECKR_RESET_VALUE;

@@ -23,7 +23,7 @@
 
 #include <stdint.h>
 
-#include "stm8l.h"
+#include "stm8s.h"
 #include "main.h"
 #include "modbus/mb.h"
 #include "uart.h"

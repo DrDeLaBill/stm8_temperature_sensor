@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "stm8l.h"
+#include "stm8s.h"
 
 
 #define GPIO_PIN_4         ((uint8_t)0x10)

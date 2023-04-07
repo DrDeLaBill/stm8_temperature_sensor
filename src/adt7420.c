@@ -1,6 +1,6 @@
 #include "adt7420.h"
 
-#include "stm8l.h"
+#include "stm8s.h"
 #include "i2c.h"
 
 
