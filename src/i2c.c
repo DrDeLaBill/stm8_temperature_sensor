@@ -20,10 +20,10 @@
  */
 
 /*
- * I2C_FREQR - peripherial input clock (>=1MHz - standard, >=4MHz - fast)
+ * I2C->FREQR - peripherial input clock (>=1MHz - standard, >=4MHz - fast)
  * + clock control & rise time
- * I2C_CR1 - enable
- * I2C_CR2 - start bit (generate + set SB bit + interrupt if ITEVTEN==1)
+ * I2C->CR1 - enable
+ * I2C->CR2 - start bit (generate + set SB bit + interrupt if ITEVTEN==1)
  * writing can be in 7 & 10 bit modes
  *
  *                        ** 7bit transmit**
@@ -64,33 +64,33 @@
  *
  *
  *                            *** REGISTERS ***
- * I2C_CR1:  | NOSTRETCH | ENGC | reserved[5:1] | PE |
+ * I2C->CR1:  | NOSTRETCH | ENGC | reserved[5:1] | PE |
  *   NOSTRETCH - ==1 to slave mode
  *   ENGC      - generall call EN/DIS
  *   PE        - ==1 to enable I2C
  *
- * I2C_CR2:  | SWRST | res[6:4] | POS | ACK | STOP | START |
+ * I2C->CR2:  | SWRST | res[6:4] | POS | ACK | STOP | START |
  *  SWRST - ==1 to software reset
  *  POS   - ACK position (==0 for current byte, ==1 for next byte)
  *  ACK   - send ACK after reading byte
  *  STOP  - send STOP after reading byte
  *  START - send repeated START
- *   DO NOT make any changes with I2C_CR2 when sending START/STOP
+ *   DO NOT make any changes with I2C->CR2 when sending START/STOP
  *     before they'll be cleared by hardware!
  *
- * I2C_FREQR: | res[7:6] | FREQ[5:0] |
+ * I2C->FREQR: | res[7:6] | FREQ[5:0] |
  *   FREQ - I2C clock frequency (in MHz, from 1 to 24)
  *
- * I2C_OARL: | ADD[7:1] | ADD0 | - LSB of address
+ * I2C->OARL: | ADD[7:1] | ADD0 | - LSB of address
  *   ADD0 - 0th bit of address in 10bit mode, don't care in 7bit mode
  *
- * I2C_OARH: | ADDMODE | ADDCONF | res[5:3] | ADD[9:8] | res |
+ * I2C->OARH: | ADDMODE | ADDCONF | res[5:3] | ADD[9:8] | res |
  *   ADDMODE - 0 for 7bit, 1 for 10bit address
  *   ADDCONF - must always be written as 1 ("address is set")
  *
- * I2C_DR - data I/O register
+ * I2C->DR - data I/O register
  *
- * I2C_SR1: | TXE | RXNE | res | STOPF | ADD10 | BTF | ADDR | SB |
+ * I2C->SR1: | TXE | RXNE | res | STOPF | ADD10 | BTF | ADDR | SB |
  *   TXE   - set when DR is empty for transmission
  *   RXNE  - set when DR not empty in receiver mode
  *   STOPF - stop detected (slave mode)
@@ -99,44 +99,45 @@
  *   ADDR  - address sent (not set if NACK)
  *   SB    - start condition
  *
- * I2C_SR2: | res[7:6] | WUFH | res | OVR | AF | ARLO | BERR |
+ * I2C->SR2: | res[7:6] | WUFH | res | OVR | AF | ARLO | BERR |
  *   WUFH - wakeup from halt
  *   OVR  - overrun/underrun
  *   AF   - acknowledge failure (must be cleared by software)
  *   ARLO - arbitration lost (another master on line, clear it by SW)
  *   BERR - bus error (clear by SW)
  *
- * I2C_SR3: | res[7:5] | GENCALL | res | TRA | BUSY | MSL |
+ * I2C->SR3: | res[7:5] | GENCALL | res | TRA | BUSY | MSL |
  *   GENCALL - general call in slave mode
  *   TRA     - transmitter(1)/receiver(0) flag
  *   BUSY    - bus busy (another communication detected)
  *   MSL     - slave(0)/master(1) mode, set/cleared by HW
  *
- * I2C_ITR: | res[7:3] | ITBUFEN | ITEVTEN | ITERREN |
+ * I2C->ITR: | res[7:3] | ITBUFEN | ITEVTEN | ITERREN |
  *   ITBUFEN - enable buffer interrupt
  *   ITEVTEN - enable event interrupt
  *   ITERREN - enable error interrupt
  *
- * I2C_CCRL: | CCR[7:0] |
+ * I2C->CCRL: | CCR[7:0] |
  *   SCLH clock in master mode
  *    standard: T = 2*CCR*tmaster, Tlow = Thigh = CCR*tmaster
  *    fast: (DUTY==0) T = 3*CCR*tmaster, Thigh = CCR*tmaster, Tlow = 2*Thigh
  *          (DUTY==1) T = 25*CCR*tmaster, Thigh=9*CCR*tmaster, Tlow=16*CCR*tmaster
- *   fmaster - clock by I2C_FREQR
+ *   fmaster - clock by I2C->FREQR
  *  minimum allowed value is 4 (exept FAST DUTY, when it is 1)
  *
- * I2C_CCRH: | F/S | DUTY | res[5:4] | CCR[11:8] |
+ * I2C->CCRH: | F/S | DUTY | res[5:4] | CCR[11:8] |
  *   F/S  - == 1 in fast mode
  *   DUTY - (see upper)
  * IN standard mode 100kHz is: FREQR=8, CCR=0x28
  *
- * I2C_TRISER: | res[7:6] | TRISE[5:0] |
+ * I2C->TRISER: | res[7:6] | TRISE[5:0] |
  *   TRISE - maximum rise time (0x09 for standard @100kHz)
  *
  */
 
 #include "i2c.h"
-#include "ports_definition.h"
+#include "stm8s_gpio.h"
+#include "utils.h"
 
 static uint8_t addr7r = 0, addr7w = 0;
 
@@ -145,12 +146,12 @@ extern volatile unsigned long Global_time;
 static uint16_t _c;
 #define I2C_WAIT(evt, tmo)  do{ \
 		for(_c = 1000U*tmo; _c && !(evt); _c--);   \
-		if(!_c){ret = I2C_TMOUT; goto eotr;}}while(0)
+		if(!_c) {ret = I2C_TMOUT; goto eotr;}}while(0)
 
 static uint8_t _d;
-#define I2C_LINEWAIT() do{ for(_d = 0; _d < 16; _d++){\
-		for(_c = 0; (_c < 60000) && (I2C_SR3 & 2); _c++); \
-		if(!(I2C_SR3 & 2)) break; I2C_CR2 |= 2;} \
+#define I2C_LINEWAIT() do{ for(_d = 0; _d < 16; _d++) {\
+		for(_c = 0; (_c < 60000) && (I2C->SR3 & 2); _c++); \
+		if(!(I2C->SR3 & 2)) break; I2C->CR2 |= 2;} \
 		if(_d == 16) return I2C_LINEBUSY; }while(0)
 
 
@@ -158,22 +159,22 @@ static uint8_t _d;
 /**
  * configure 100kHz speed in standard mode & enable i2c
  */
-void i2c_setup(){
-	// configure pins: PB5 - I2C_SDA; PB4 - I2C_SCL (both opendrain)
-	PORT(PB, ODR) |= GPIO_PIN4|GPIO_PIN5; // set to 1
-	PORT(PB, DDR) |= GPIO_PIN4|GPIO_PIN5;
-	PORT(PB, CR2) |= GPIO_PIN4|GPIO_PIN5; // fast mode
+void i2c_setup() {
+	// configure pins: PB5 - I2C->SDA; PB4 - I2C->SCL (both opendrain)
+	GPIOB->ODR |= GPIO_PIN_4 | GPIO_PIN_5; // set to 1
+	GPIOB->DDR |= GPIO_PIN_4 | GPIO_PIN_5;
+	GPIOB->CR2 |= GPIO_PIN_4 | GPIO_PIN_5; // fast mode
 	// Don't forget to connect pullup resistor to I2C foots
-	I2C_FREQR = 8; // 8MHz fmaster
-	I2C_TRISER = 9; // rise time 1000ns
-	I2C_CCRL = 80; // 100kHz
-	I2C_CCRH = 0;
-	I2C_ITR = 0; // disable all I2C interrupts
-	I2C_CR2 |= 4; // ACK
-	I2C_CR1 |= 1; // enable I2C
+	I2C->FREQR = 8; // 8MHz fmaster
+	I2C->TRISER = 9; // rise time 1000ns
+	I2C->CCRL = 80; // 100kHz
+	I2C->CCRH = 0;
+	I2C->ITR = 0; // disable all I2C interrupts
+	I2C->CR2 |= 4; // ACK
+	I2C->CR1 |= 1; // enable I2C
 }
 
-void i2c_set_addr7(uint8_t addr){
+void i2c_set_addr7(uint8_t addr) {
 	addr7w = addr << 1;
 	addr7r = addr7w | 1;
 }
@@ -184,31 +185,31 @@ void i2c_set_addr7(uint8_t addr){
  * @param stop - ==1 to send stop event
  * @return I2C_OK if success errcode if fails
  */
-i2c_status i2c_7bit_send_onebyte(uint8_t data, uint8_t stop){
+i2c_status i2c_7bit_send_onebyte(uint8_t data, uint8_t stop) {
 	i2c_status ret = I2C_LINEBUSY;
 	I2C_LINEWAIT();
-	I2C_CR2 |= 1; // send START
-	I2C_WAIT((I2C_SR1 & 1), 2); // wait for SB
-	I2C_DR = addr7w;
+	I2C->CR2 |= 1; // send START
+	I2C_WAIT((I2C->SR1 & 1), 2); // wait for SB
+	I2C->DR = addr7w;
 	ret = I2C_NOADDR;
-	I2C_WAIT(((I2C_SR1 & 2) || I2C_SR2), 2); // wait for ADDR
-	if(I2C_SR2){ // NACK or other error
+	I2C_WAIT(((I2C->SR1 & 2) || I2C->SR2), 2); // wait for ADDR
+	if (I2C->SR2) { // NACK or other error
 		ret = I2C_NACK;
 		goto eotr;
 	}
 	ret = I2C_HWPROBLEM;
 	// clear ADDR reading SR3
-	if(!(I2C_SR3 & 4)) goto eotr; // interface is in receiver mode
-	I2C_WAIT((I2C_SR1 & 0x80), 2); // wait for TXE
-	I2C_DR = data; // send data
-	I2C_WAIT(((0x84 == (I2C_SR1 & 0x84)) || I2C_SR2), 15); // wait for TXE & BTF
-	if(!I2C_SR2) ret = I2C_OK;
+	if (!(I2C->SR3 & 4)) goto eotr; // interface is in receiver mode
+	I2C_WAIT((I2C->SR1 & 0x80), 2); // wait for TXE
+	I2C->DR = data; // send data
+	I2C_WAIT(((0x84 == (I2C->SR1 & 0x84)) || I2C->SR2), 15); // wait for TXE & BTF
+	if (!I2C->SR2) ret = I2C_OK;
 	else ret = I2C_NACK;
 eotr:
-	I2C_SR2 = 0; // clear all error flagss
-	if(stop){
-		I2C_CR2 |= 2; // set STOP
-		while(I2C_CR2 & 2); // wait for STOP sent
+	I2C->SR2 = 0; // clear all error flagss
+	if (stop) {
+		I2C->CR2 |= 2; // set STOP
+		while (I2C->CR2 & 2); // wait for STOP sent
 	}
 	return ret;
 }
@@ -220,37 +221,37 @@ eotr:
  * @param stop - ==1 to send stop event
  * return I2C_OK if OK
  */
-i2c_status i2c_7bit_send(uint8_t *data, uint8_t datalen, uint8_t stop){
+i2c_status i2c_7bit_send(uint8_t *data, uint8_t datalen, uint8_t stop) {
 	i2c_status ret = I2C_LINEBUSY;
 	I2C_LINEWAIT();
-	I2C_CR2 |= 1; // send START
+	I2C->CR2 |= 1; // send START
 	ret = I2C_TMOUT;
-	I2C_WAIT((I2C_SR1 & 1), 2); // wait for SB
-	I2C_DR = addr7w;
+	I2C_WAIT((I2C->SR1 & 1), 2); // wait for SB
+	I2C->DR = addr7w;
 	ret = I2C_NOADDR;
-	I2C_WAIT(((I2C_SR1 & 2) || I2C_SR2), 2); // wait for ADDR
-	if(I2C_SR2){ // NACK or other error
+	I2C_WAIT(((I2C->SR1 & 2) || I2C->SR2), 2); // wait for ADDR
+	if(I2C->SR2) { // NACK or other error
 		ret = I2C_NACK;
 		goto eotr;
 	}
 	ret = I2C_HWPROBLEM;
-	if(!(I2C_SR3 & 4)) goto eotr; // interface is in receiver mode
-	while(datalen--){
-		I2C_WAIT(((I2C_SR1 & 0x80) || I2C_SR2), 2); // wait for TXE
-		if(I2C_SR2){
+	if(!(I2C->SR3 & 4)) goto eotr; // interface is in receiver mode
+	while(datalen--) {
+		I2C_WAIT(((I2C->SR1 & 0x80) || I2C->SR2), 2); // wait for TXE
+		if(I2C->SR2) {
 			ret = I2C_NACK;
 			goto eotr;
 		}
-		I2C_DR = *data++; // send data
+		I2C->DR = *data++; // send data
 	}
-	I2C_WAIT(((0x84 == (I2C_SR1 & 0x84)) || I2C_SR2), 15); // wait for TXE & BTF
-	if(!I2C_SR2) ret = I2C_OK;
+	I2C_WAIT(((0x84 == (I2C->SR1 & 0x84)) || I2C->SR2), 15); // wait for TXE & BTF
+	if(!I2C->SR2) ret = I2C_OK;
 	else ret = I2C_NACK;
 eotr:
-	I2C_SR2 = 0; // clear all error flags
-	if(stop){
-		I2C_CR2 |= 2; // set STOP
-		while(I2C_CR2 & 2); // wait for STOP sent
+	I2C->SR2 = 0; // clear all error flags
+	if(stop) {
+		I2C->CR2 |= 2; // set STOP
+		while(I2C->CR2 & 2); // wait for STOP sent
 	}
 	return ret;
 }
@@ -261,45 +262,45 @@ eotr:
  * @param wait - ==1 to wait while LINEBUSY (can send STOP before reading)
  * @return I2C_OK if ok  || error code
  */
-i2c_status i2c_7bit_receive_onebyte(uint8_t *data, uint8_t wait){
+i2c_status i2c_7bit_receive_onebyte(uint8_t *data, uint8_t wait) {
 	i2c_status ret = I2C_LINEBUSY;
 	if(wait)
 		I2C_LINEWAIT();
-	I2C_CR2 |= 5; // send START & set ACK
+	I2C->CR2 |= 5; // send START & set ACK
 	ret = I2C_TMOUT;
-	I2C_WAIT((I2C_SR1 & 1), 2); // wait for SB
-	I2C_DR = addr7r; // send address & read bit
+	I2C_WAIT((I2C->SR1 & 1), 2); // wait for SB
+	I2C->DR = addr7r; // send address & read bit
 	ret = I2C_NOADDR;
-	I2C_WAIT(((I2C_SR1 & 2) || I2C_SR2), 2); // wait for ADDR
-	if(I2C_SR2){ // NACK or other error
+	I2C_WAIT(((I2C->SR1 & 2) || I2C->SR2), 2); // wait for ADDR
+	if(I2C->SR2) { // NACK or other error
 		ret = I2C_NACK;
 		goto eotr;
 	}
 	disableInterrupts();
 	// clear POS|ACK
-	I2C_CR2 &= ~0x0c;
+	I2C->CR2 &= ~0x0c;
 	ret = I2C_HWPROBLEM;
 	// read SR3 to clear ADDR
-	if((I2C_SR3 & 4)){
+	if((I2C->SR3 & 4)) {
 		enableInterrupts();
 		goto eotr; // interface is in transmitter mode
 	}
 	// set STOP
-	I2C_CR2 |= 2;
+	I2C->CR2 |= 2;
 	enableInterrupts();
 	// wait for RxNE
-	I2C_WAIT(((I2C_SR1 & 0x40) || I2C_SR2), 2);
-	if(I2C_SR2){
+	I2C_WAIT(((I2C->SR1 & 0x40) || I2C->SR2), 2);
+	if(I2C->SR2) {
 		ret = I2C_NACK;
 		goto eotr; // error
 	}
 	ret = I2C_OK;
 	// read data clearing RxNE
-	*data = I2C_DR;
+	*data = I2C->DR;
 eotr:
-	I2C_SR2 = 0; // clear all error flags
-	if(!I2C_CR2 & 2) I2C_CR2 |= 2;
-	while(I2C_CR2 & 2); // wait for STOP sent
+	I2C->SR2 = 0; // clear all error flags
+	if(!I2C->CR2 & 2) I2C->CR2 |= 2;
+	while(I2C->CR2 & 2); // wait for STOP sent
 	return ret;
 }
 
@@ -309,52 +310,52 @@ eotr:
  * @param wait - ==1 to wait while LINEBUSY (can send STOP before reading)
  * @return I2C_OK if ok  || error code
  */
-i2c_status i2c_7bit_receive_twobyte(uint8_t *data, uint8_t wait){
+i2c_status i2c_7bit_receive_twobyte(uint8_t *data, uint8_t wait) {
 	i2c_status ret = I2C_LINEBUSY;
 	if(wait)
 		I2C_LINEWAIT();
-	I2C_CR2 |= 5; // send START & set ACK
+	I2C->CR2 |= 5; // send START & set ACK
 	ret = I2C_TMOUT;
-	I2C_WAIT((I2C_SR1 & 1), 2); // wait for SB
-	I2C_DR = addr7r; // send address & read bit
+	I2C_WAIT((I2C->SR1 & 1), 2); // wait for SB
+	I2C->DR = addr7r; // send address & read bit
 	// set POS|ACK
-	I2C_CR2 |= 0x0c;
+	I2C->CR2 |= 0x0c;
 	ret = I2C_NOADDR;
-	I2C_WAIT(((I2C_SR1 & 2) || I2C_SR2), 2); // wait for ADDR
-	if(I2C_SR2){ // NACK or other error
+	I2C_WAIT(((I2C->SR1 & 2) || I2C->SR2), 2); // wait for ADDR
+	if(I2C->SR2) { // NACK or other error
 		ret = I2C_NACK;
 		goto eotr;
 	}
 	disableInterrupts();
 	ret = I2C_HWPROBLEM;
 	// read SR3 to clear ADDR
-	if(I2C_SR3 & 4){
+	if(I2C->SR3 & 4) {
 		enableInterrupts();
 		goto eotr; // interface is in transmitter mode
 	}
 	// clear ACK
-	I2C_CR2 &= ~4;
+	I2C->CR2 &= ~4;
 	enableInterrupts();
 	// wait for BTF
-	I2C_WAIT(((I2C_SR1 & 4) || I2C_SR2), 15);
-	if(I2C_SR2){
+	I2C_WAIT(((I2C->SR1 & 4) || I2C->SR2), 15);
+	if(I2C->SR2) {
 		ret = I2C_NACK;
 		goto eotr;
 	}
 	// patch from ERRATA
 	disableInterrupts();
 	// set STOP
-	I2C_CR2 |= 2;
+	I2C->CR2 |= 2;
 	ret = I2C_OK;
 	// read data
-	data[0] = I2C_DR;
+	data[0] = I2C->DR;
 	enableInterrupts();
-	data[1] = I2C_DR;
+	data[1] = I2C->DR;
 eotr:
-	I2C_SR2 = 0; // clear all error flags
-	if(!I2C_CR2 & 2) I2C_CR2 |= 2;
-	while(I2C_CR2 & 2); // wait for STOP sent
+	I2C->SR2 = 0; // clear all error flags
+	if(!I2C->CR2 & 2) I2C->CR2 |= 2;
+	while(I2C->CR2 & 2); // wait for STOP sent
 	// clear POS
-	I2C_CR2 &= ~8;
+	I2C->CR2 &= ~8;
 	return ret;
 }

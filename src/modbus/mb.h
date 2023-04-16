@@ -101,7 +101,7 @@ typedef struct {
 	uint8_t *Data;			// Data     if Packet Type = Var Size
 
 	uint8_t err;			// Error Value if Packet Type = Error
-}mb_packet_s;
+} mb_packet_s;
 
 // MODBUS Config
 typedef struct{
@@ -110,7 +110,7 @@ typedef struct{
 	#if(MB_MODE==MB_MODE_MASTER)
 	void (*master_process_handler)(mb_packet_s);
 	#endif
-}mb_config_s;
+} mb_config_s;
 
 // Set MODBUS Config Public
 extern mb_config_s MB_Config;

@@ -6,5 +6,6 @@
         "mb-table.h": "c",
         "i2c.h": "c",
         "mb.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": true
 }

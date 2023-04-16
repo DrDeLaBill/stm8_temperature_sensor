@@ -1,4 +1,4 @@
-NAME=uart
+NAME=tempsens
 SDCC=sdcc
 
 CCFLAGS=-DSTM8S003 -I../ -I/usr/share/sdcc/include -mstm8 --out-fmt-ihx

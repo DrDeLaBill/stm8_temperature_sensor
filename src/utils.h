@@ -6,5 +6,9 @@
 
 #define ABS_DIF(first_n, second_n) ABS(first_n, second_n)
 
+#define CONCAT(a, b)	a ## -> ## b
+
+#define PORT(a, b)		CONCAT(a , b)
+
 
 #endif

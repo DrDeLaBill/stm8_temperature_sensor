@@ -22,6 +22,17 @@
 			],
 			"group": "build",
 			"detail": "компилятор: C:/Users/georg/.platformio/packages/toolchain-sdcc/bin/sdcc.exe"
+		},
+		{
+			"type": "cmake",
+			"label": "CMake: build",
+			"command": "build",
+			"targets": [
+				""
+			],
+			"group": "build",
+			"problemMatcher": [],
+			"detail": "CMake template build task"
 		}
 	]
 }
