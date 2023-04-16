@@ -384,13 +384,9 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   */
   if (uart1_state == UART1_SEND) {
     volatile char tmp = UART1->DR;
-    // str[0] = '1';
     return;
   }
-  // str[1] = UART1->DR;
-  // str[1] = '1';
   mb_rx_new_data((uint8_t)UART1->DR);
-  // mb_start_time = Global_time;
 }
 #endif /*STM8S105 || STM8S001 */
 

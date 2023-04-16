@@ -116,6 +116,5 @@
 void uart1_send_byte(uint8_t* Data,uint8_t Len);
 uint32_t get_clock_freq();
 
-extern char str[6];
 
 #endif
