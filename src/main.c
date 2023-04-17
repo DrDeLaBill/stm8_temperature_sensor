@@ -4,11 +4,9 @@
 #include "stm8s_it.h"
 
 #include "tim.h"
-#include "uart.h"
 #include "utils.h"
 #include "adt7420.h"
-#include "modbus/mb.h"
-#include "modbus/mb-table.h"
+#include "modbus_manager.h"
 
 
 void system_clock_init();
@@ -21,16 +19,14 @@ int main(void)
     system_clock_init();
     tim_init();
     gpio_init();
-    uart_init(UART_BAUD_RATE, get_clock_freq());
     adt7420_init();
+    modbus_manager_init();
 
     enableInterrupts();
-    
-    mb_slave_address_set(SLAVE_DEVICE_ID);
-    mb_set_tx_handler(&uart_tx_data);
 
     while (1) {
       adt7420_proccess();
+      modbus_proccess();
     }
 
     return 0;
@@ -50,7 +46,7 @@ void  system_clock_init()
 
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F));
-  // CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F));
+  CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F));
 }
 
 void gpio_init()

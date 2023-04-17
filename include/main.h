@@ -7,8 +7,8 @@
 
 
 // Config
-// #define F_MASTER_MHZ       16UL
-// #define F_MASTER_HZ        16000000UL
+#define F_MASTER_MHZ          16UL
+#define F_MASTER_HZ           16000000UL
 // CLK
 #define CLK_PRESCALER_HSIDIV1 (uint8_t)0x00
 #define CLK_PRESCALER_CPUDIV1 (uint8_t)0x80, /*!< CPU clock division factors 1 */
@@ -104,7 +104,7 @@
 // I2C
 #define I2C_FREQ           I2C_MAX_STANDARD_FREQ
 #define I2C_ACK            0x01
-#define I2C_ADT7420_ADDR   0x48
+#define I2C_ADT7420_ADDR   (uint8_t)(0x48 << 1 | 0)
 #define SET16BITMODE       0b10100000
 #define F_I2C_HZ           100000UL
 // Sensor
@@ -113,7 +113,6 @@
 #define ADT7420_DELAY       (uint32_t)1000
 
 
-void uart1_send_byte(uint8_t* Data,uint8_t Len);
 uint32_t get_clock_freq();
 
 

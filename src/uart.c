@@ -80,24 +80,16 @@ uint8_t uart_rx_byte() {
 // Отправка массива данных
 //******************************************************************************
 void uart_tx_data(uint8_t * data, uint8_t len) {
-  GPIOD->ODR |= (uint8_t)(MAX485_PIN);
-  while (GPIOD->IDR & RX_PIN);
-  uart1_state = UART1_SEND;
   while (len--) {
     uart_tx_byte(*data++);
   }
-  uart_tx_byte('\n');
-  while(!(UART1->SR & UART1_SR_TXE));
-  uart1_state = UART1_RECIEVE;
-  GPIOD->ODR &= ~(uint8_t)(MAX485_PIN);
-  while (GPIOD->IDR & MAX485_PIN);
 }
 
 //******************************************************************************
 // Прием массива данных
 //******************************************************************************
-void uart_rx_data(uint8_t * data, uint8_t len) {
-  while(len--){
+void uart_rx_data(uint8_t* data, uint8_t len) {
+  while(len--) {
     *data++ = uart_rx_byte();
   }
 }

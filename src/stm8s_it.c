@@ -30,7 +30,7 @@
 
 #include "main.h"
 #include "uart.h"
-#include "modbus/mb.h"
+#include "mb.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
