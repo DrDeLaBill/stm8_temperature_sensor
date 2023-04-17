@@ -13,7 +13,7 @@ uint32_t adt7420_delay = 0;
 
 void adt7420_proccess()
 {
-  if ((uint32_t)ABS_DIF(Global_time, adt7420_delay) < ADT7420_DELAY) {
+  if ((uint32_t)ABS_DIF(Global_time, adt7420_delay) > ADT7420_DELAY) {
     return;
   }
   adt7420_delay = Global_time;
@@ -52,14 +52,17 @@ t_i2c_status adt7420_available()
 t_i2c_status adt7420_get_temperature(int16_t* value)
 {
   //Чтение регистров adt7420
-  uint8_t resp = 0;
-  t_i2c_status status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_MOST_SIGNIFICANT_BYTE, &resp, 1);
+  uint8_t resp_h = 0;
+  uint8_t resp_l = 0;
 
+  t_i2c_status status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_MOST_SIGNIFICANT_BYTE, &resp_h, 1);
   if (status == I2C_SUCCESS) {
-    *value = resp;
-  } else {
-    // *value = status + 0x0200;
-    // return adt7420_check_error(status);
+    *value |= ((uint16_t)resp_h << 8);
+  }
+
+  status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_LEAT_SIGNIFICANT_BYTE, &resp_l, 1);
+  if (status == I2C_SUCCESS) {
+    *value |= (uint16_t)resp_l;
   }
   
   return status;

@@ -14,6 +14,9 @@ typedef struct modbus_data_status_typedef {
 } modbus_data_status;
 
 
+extern uint32_t modbus_read_time;
+
+
 void modbus_manager_init();
 void modbus_proccess();
 

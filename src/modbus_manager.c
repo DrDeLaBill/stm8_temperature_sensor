@@ -1,9 +1,11 @@
 #include "modbus_manager.h"
 
 #include "main.h"
+#include "stm8s_it.h"
 #include "mb.h"
 #include "mb-table.h"
 #include "uart.h"
+#include "utils.h"
 
 
 void _modbus_data_handler(uint8_t * data, uint8_t len);
@@ -11,6 +13,7 @@ void _clear_data();
 
 
 modbus_data_status modbus_data;
+uint32_t modbus_read_time = 0;
 
 
 void modbus_manager_init()
@@ -19,10 +22,15 @@ void modbus_manager_init()
     mb_slave_address_set(SLAVE_DEVICE_ID);
     mb_set_tx_handler(&_modbus_data_handler);
     _clear_data();
+    modbus_read_time = Global_time;
 }
 
 void modbus_proccess()
 {
+    if (ABS_DIF(modbus_read_time, Global_time) > MODBUS_WAIT_TIME) {
+        mb_rx_timeout_handler();
+        _clear_data();
+    }
     if (!modbus_data.length) {
         return;
     }

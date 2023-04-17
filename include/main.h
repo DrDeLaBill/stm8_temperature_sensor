@@ -9,6 +9,8 @@
 // Config
 #define F_MASTER_MHZ          16UL
 #define F_MASTER_HZ           16000000UL
+// Sensor
+#define SLAVE_DEVICE_ID    0x01
 // CLK
 #define CLK_PRESCALER_HSIDIV1 (uint8_t)0x00
 #define CLK_PRESCALER_CPUDIV1 (uint8_t)0x80, /*!< CPU clock division factors 1 */
@@ -90,9 +92,9 @@
 #define UART1_CR3_STOP    ((uint8_t)0x30) /*!< STOP bits [1:0] mask */
 #define UART1_CR1_PCEN    ((uint8_t)0x04) /*!< Parity Control Enable mask */
 #define UART1_CR1_PS      ((uint8_t)0x02) /*!< UART1 Parity Selection */
-#define UART1_BRR1_DIVM  ((uint8_t)0xFF) /*!< LSB mantissa of UART1DIV [7:0] mask */
-#define UART1_BRR2_DIVM  ((uint8_t)0xF0) /*!< MSB mantissa of UART1DIV [11:8] mask */
-#define UART1_BRR2_DIVF  ((uint8_t)0x0F) /*!< Fraction bits of UART1DIV [3:0] mask */
+#define UART1_BRR1_DIVM   ((uint8_t)0xFF) /*!< LSB mantissa of UART1DIV [7:0] mask */
+#define UART1_BRR2_DIVM   ((uint8_t)0xF0) /*!< MSB mantissa of UART1DIV [11:8] mask */
+#define UART1_BRR2_DIVF   ((uint8_t)0x0F) /*!< Fraction bits of UART1DIV [3:0] mask */
 #define UART1_CR2_TEN     ((uint8_t)0x08) /*!< Transmitter Enable mask */
 #define UART1_CR2_REN     ((uint8_t)0x04) /*!< Receiver Enable mask */
 #define UART1_CR3_CPOL    ((uint8_t)0x04) /*!< Clock Polarity mask */
@@ -107,10 +109,10 @@
 #define I2C_ADT7420_ADDR   (uint8_t)(0x48 << 1 | 0)
 #define SET16BITMODE       0b10100000
 #define F_I2C_HZ           100000UL
-// Sensor
-#define SLAVE_DEVICE_ID    0x01
 // ADT7420
-#define ADT7420_DELAY       (uint32_t)1000
+#define ADT7420_DELAY      (uint32_t)1000
+// MODBUS
+#define MODBUS_WAIT_TIME   (uint32_t)1000
 
 
 uint32_t get_clock_freq();

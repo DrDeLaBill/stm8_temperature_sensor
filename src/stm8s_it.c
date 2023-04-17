@@ -31,6 +31,7 @@
 #include "main.h"
 #include "uart.h"
 #include "mb.h"
+#include "modbus_manager.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -386,6 +387,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
     volatile char tmp = UART1->DR;
     return;
   }
+  modbus_read_time = Global_time;
   mb_rx_new_data((uint8_t)UART1->DR);
 }
 #endif /*STM8S105 || STM8S001 */
