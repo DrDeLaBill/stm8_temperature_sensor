@@ -113,9 +113,18 @@
 #define ADT7420_DELAY      (uint32_t)1000
 // MODBUS
 #define MODBUS_WAIT_TIME   (uint32_t)1000
+// IWDG
+#define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
+#define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */
+#define IWDG_Prescaler_128       ((uint8_t)0x05) /*!< Used to set prescaler register to 128 */
+#define IWDG_WriteAccess_Disable ((uint8_t)0x00) /*!< Code 0x00 in Key register, not allow write access to Prescaler and Reload registers */
+#define IWDG_KEY_REFRESH         ((uint8_t)0xAA)  /*!<  This value written in the Key register prevent the watchdog reset */
 
 
 uint32_t get_clock_freq();
+
+
+extern volatile uint32_t Global_time;
 
 
 #endif

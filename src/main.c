@@ -4,6 +4,7 @@
 #include "stm8s_it.h"
 
 #include "tim.h"
+#include "iwdg.h"
 #include "utils.h"
 #include "adt7420.h"
 #include "modbus_manager.h"
@@ -11,7 +12,9 @@
 
 void system_clock_init();
 void gpio_init();
-uint32_t get_clock_freq();
+
+
+volatile uint32_t Global_time   = 0; // global time in ms
 
 
 int main(void)
@@ -21,10 +24,12 @@ int main(void)
     gpio_init();
     adt7420_init();
     modbus_manager_init();
+    iwdg_init();
 
     enableInterrupts();
 
     while (1) {
+      iwdg_reload();
       adt7420_proccess();
       modbus_proccess();
     }
@@ -35,7 +40,7 @@ int main(void)
 void  system_clock_init()
 {
   CLK->ICKR |= ENABLE;
-  
+
   /* Clear High speed internal clock prescaler */
   CLK->CKDIVR &= (uint8_t)(~CLK_CKDIVR_HSIDIV);
   /* Set High speed internal clock prescaler */
@@ -69,24 +74,6 @@ void gpio_init()
   GPIOD->CR2 |= (uint8_t)(MAX485_PIN);
 
   GPIOD->ODR &= ~(uint8_t)(MAX485_PIN);
-}
-
-uint32_t get_clock_freq()
-{
-  uint32_t clock_frequency = 0;
-  uint8_t clock_source;
-  uint8_t tmp = 0, presc = 0;
-  const uint8_t HSI_div_factor[4] = {1, 2, 4, 8}; /*!< Holds the different HSI Divider factors */
-  
-  /* Get CLK source. */
-  clock_source = (uint8_t)CLK->CMSR;
-  
-  tmp = (uint8_t)(CLK->CKDIVR & CLK_CKDIVR_HSIDIV);
-  tmp = (uint8_t)(tmp >> 3);
-  presc = HSI_div_factor[tmp];
-  clock_frequency = HSI_VALUE / presc;
-
-  return ((uint32_t)clock_frequency);
 }
 
 #ifdef USE_FULL_ASSERT

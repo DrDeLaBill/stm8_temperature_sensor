@@ -37,8 +37,6 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 /* Exported variables --------------------------------------------------------*/
-// extern volatile uint32_t mb_start_time;
-extern volatile uint32_t Global_time;
 
 #ifdef _COSMIC_
  void _stext(void); /* RESET startup routine */

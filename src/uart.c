@@ -4,6 +4,15 @@
 
 #include "stm8s.h"
 #include "main.h"
+#include "utils.h"
+
+
+#define UART_CHECK(condition, time)   if (!wait_event(condition, time)) {return;}
+#define UART_CHECK_D(condition, time) if (!wait_event(condition, time)) {return 0;}
+
+
+bool _is_uart_txe();
+bool _is_uart_rxne();
 
 
 UART1_STATE_Typedef uart1_state = UART1_RECIEVE;
@@ -62,7 +71,7 @@ void uart_init(uint32_t baud_rate, uint32_t f_master) {
 // Отправка байта
 //******************************************************************************
 void uart_tx_byte(uint8_t data) {
-  while(!(UART1->SR & UART1_SR_TXE));
+  UART_CHECK(&_is_uart_txe, 5);
   UART1->DR = data;
 }
 
@@ -71,7 +80,7 @@ void uart_tx_byte(uint8_t data) {
 //******************************************************************************
 uint8_t uart_rx_byte() {
   uint8_t data;
-  while(!(UART1->SR & UART1_SR_RXNE));
+  UART_CHECK_D(&_is_uart_rxne, 5);
   data = UART1->DR;
   return data;
 }
@@ -92,4 +101,14 @@ void uart_rx_data(uint8_t* data, uint8_t len) {
   while(len--) {
     *data++ = uart_rx_byte();
   }
+}
+
+bool _is_uart_txe()
+{
+  return UART1->SR & UART1_SR_TXE;
+}
+
+bool _is_uart_rxne()
+{
+  return UART1->SR & UART1_SR_RXNE;
 }

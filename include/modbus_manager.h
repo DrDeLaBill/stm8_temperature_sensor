@@ -4,17 +4,20 @@
 
 #include <stdint.h>
 
+#include "mb-table.h"
+
 
 #define MODBUS_BUF_SIZE 20
 
 
 typedef struct modbus_data_status_typedef {
-    uint8_t data[MODBUS_BUF_SIZE];
+    uint8_t data[TABLE_Holding_Registers_Size + 10];
     uint8_t length;
+    uint32_t start_time;
 } modbus_data_status;
 
 
-extern uint32_t modbus_read_time;
+extern modbus_data_status modbus_data;
 
 
 void modbus_manager_init();

@@ -43,8 +43,6 @@
 /* Public functions ----------------------------------------------------------*/
 
 /* Public variables ----------------------------------------------------------*/
-volatile uint32_t Global_time   = 0; // global time in ms
-// volatile uint32_t mb_start_time = 0; // modbus delay
 
 /** @addtogroup FLASH_ByteReadWriteOperation
   * @{
@@ -384,10 +382,10 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
      it is recommended to set a breakpoint on the following instruction.
   */
   if (uart1_state == UART1_SEND) {
-    volatile char tmp = UART1->DR;
+    UART1->DR;
     return;
   }
-  modbus_read_time = Global_time;
+  modbus_data.start_time = Global_time;
   mb_rx_new_data((uint8_t)UART1->DR);
 }
 #endif /*STM8S105 || STM8S001 */

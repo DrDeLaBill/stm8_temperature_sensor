@@ -2,7 +2,7 @@
 
 #include "stm8s.h"
 #include "i2c.h"
-#include "stm8s_it.h"
+#include "main.h"
 #include "utils.h"
 #include "mb.h"
 #include "mb-table.h"
@@ -13,15 +13,14 @@ uint32_t adt7420_delay = 0;
 
 void adt7420_proccess()
 {
-  if ((uint32_t)ABS_DIF(Global_time, adt7420_delay) > ADT7420_DELAY) {
+  if ((uint32_t)ABS_DIF(Global_time, adt7420_delay) < ADT7420_DELAY) {
     return;
   }
   adt7420_delay = Global_time;
-  // mb_table_write(TABLE_Holding_Registers, 0, Global_time);
-  int16_t tempr = 1;
+  int16_t tempr = 0;
   t_i2c_status status = adt7420_get_temperature(&tempr);
   if (status != I2C_SUCCESS) {
-    tempr = ADT7420_ERROR_RESP;
+    tempr = 0;
   }
   mb_table_write(TABLE_Holding_Registers, 0, tempr);
 }
@@ -36,8 +35,6 @@ t_i2c_status adt7420_available()
 {
   uint8_t resp = 0;
   t_i2c_status status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_ID, &resp, 1);
-
-  mb_table_write(TABLE_Holding_Registers, 1, resp);
 
   if ((resp & 0xF0) != 0xC0) {
     return I2C_ERROR;

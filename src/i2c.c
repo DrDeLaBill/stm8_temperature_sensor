@@ -2,23 +2,24 @@
 
 #include "stm8s.h"
 #include "main.h"
+#include "utils.h"
 
-//Таймаут ожидания события I2C
-static uint32_t i2c_timeout;
 
-//Задать таймаут в микросекундах
-#define set_tmo_us(time)           i2c_timeout = (uint32_t)(F_MASTER_MHZ * time)
+#define BUS_RESET_TIME_MS          10
+#define I2C_DEFAULT_DELAY          5
 
-//Задать таймаут в миллисекундах
-#define set_tmo_ms(time)           i2c_timeout = (uint32_t)(F_MASTER_MHZ * time * 1000)
+#define I2C_CHECK(condition, time) if (!wait_event(condition, time)) {DELAY_MS(BUS_RESET_TIME_MS); return I2C_TIMEOUT;}
 
-#define tmo                        i2c_timeout--
 
-//Ожидание наступления события event
-//в течении времени timeout в мс
-#define wait_event(event, timeout) set_tmo_ms(timeout);\
-                                   while(event && i2c_timeout);\
-                                   if(!i2c_timeout) return I2C_TIMEOUT;
+bool _is_i2c_free();
+bool _is_i2c_sb();
+bool _is_i2c_addr();
+bool _is_i2c_txe();
+bool _is_i2c_btf();
+bool _is_i2c_txe_and_btf();
+bool _is_i2c_rxne();
+bool _is_i2c_stop();
+
 
 //******************************************************************************
 // Инициализация I2C интерфейса      
@@ -62,59 +63,13 @@ void i2c_master_init(uint32_t f_master_hz, uint32_t f_i2c_hz)
 }
 
 //******************************************************************************
-// Запись регистра slave-устройства
-//******************************************************************************                                   
-t_i2c_status i2c_wr_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_t length)
-{                               
-	//Ждем освобождения шины I2C
-	wait_event((I2C->SR3 & I2C_SR3_BUSY), 10);
-
-	//Генерация СТАРТ-посылки
-	I2C->CR2 |= I2C_CR2_START;
-	//Ждем установки бита SB
-	wait_event(!(I2C->SR1 & I2C_SR1_SB), 1);
-
-
-	//Записываем в регистр данных адрес ведомого устройства
-	I2C->DR = address & 0xFE;
-	//Ждем подтверждения передачи адреса
-	wait_event(!(I2C->SR1 & I2C_SR1_ADDR), 1);
-	//Очистка бита ADDR чтением регистра SR3
-	I2C->SR3;
-
-
-	//Ждем освобождения регистра данных
-	wait_event(!(I2C->SR1 & I2C_SR1_TXE), 1);
-	//Отправляем адрес регистра
-	I2C->DR = reg_addr;
-
-	//Отправка данных
-	while(length--){
-		//Ждем освобождения регистра данных
-		wait_event(!(I2C->SR1 & I2C_SR1_TXE), 1);
-		//Отправляем адрес регистра
-		I2C->DR = *data++;
-	}
-
-	//Ловим момент, когда DR освободился и данные попали в сдвиговый регистр
-	wait_event(!((I2C->SR1 & I2C_SR1_TXE) && (I2C->SR1 & I2C_SR1_BTF)), 1);
-
-	//Посылаем СТОП-посылку
-	I2C->CR2 |= I2C_CR2_STOP;
-	//Ждем выполнения условия СТОП
-	wait_event((I2C->CR2 & I2C_CR2_STOP), 1);
-
-	return I2C_SUCCESS;
-}
-
-//******************************************************************************
 // Чтение регистра slave-устройства
 // Start -> Slave Addr -> Reg. addr -> Restart -> Slave Addr <- data ... -> Stop 
 //******************************************************************************                                   
 t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_t length)
 {
 	//Ждем освобождения шины I2C
-	wait_event((I2C->SR3 & I2C_SR3_BUSY), 10);
+	I2C_CHECK(&_is_i2c_free, 10);
 
 	//Разрешаем подтверждение в конце посылки
 	I2C->CR2 |= I2C_CR2_ACK;
@@ -122,27 +77,27 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 	//Генерация СТАРТ-посылки
 	I2C->CR2 |= I2C_CR2_START;
 	//Ждем установки бита SB
-	wait_event(!(I2C->SR1 & I2C_SR1_SB), 1);
+	I2C_CHECK(&_is_i2c_sb, I2C_DEFAULT_DELAY);
 
 	//Записываем в регистр данных адрес ведомого устройства
 	I2C->DR = address & 0xFE;
 	//Ждем подтверждения передачи адреса
-	wait_event(!(I2C->SR1 & I2C_SR1_ADDR), 1);
+	I2C_CHECK(&_is_i2c_addr, I2C_DEFAULT_DELAY);
 	//Очистка бита ADDR чтением регистра SR3
 	I2C->SR3;
 
 	//Ждем освобождения регистра данных RD
-	wait_event(!(I2C->SR1 & I2C_SR1_TXE), 1);
+	I2C_CHECK(&_is_i2c_txe, I2C_DEFAULT_DELAY);
 
 	//Передаем адрес регистра slave-устройства, который хотим прочитать
 	I2C->DR = reg_addr;
 	//Ловим момент, когда DR освободился и данные попали в сдвиговый регистр
-	wait_event(!((I2C->SR1 & I2C_SR1_TXE) && (I2C->SR1 & I2C_SR1_BTF)), 1);
+	I2C_CHECK(&_is_i2c_txe_and_btf, I2C_DEFAULT_DELAY);
 
 	//Генерация СТАРТ-посылки (рестарт)
 	I2C->CR2 |= I2C_CR2_START;
 	//Ждем установки бита SB
-	wait_event(!(I2C->SR1 & I2C_SR1_SB), 1);
+	I2C_CHECK(&_is_i2c_sb, I2C_DEFAULT_DELAY);
 
 	//Записываем в регистр данных адрес ведомого устройства и переходим
 	//в режим чтения (установкой младшего бита в 1)
@@ -154,7 +109,7 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		//Запрещаем подтверждение в конце посылки
 		I2C->CR2 &= ~I2C_CR2_ACK;
 		//Ждем подтверждения передачи адреса
-		wait_event(!(I2C->SR1 & I2C_SR1_ADDR), 1);
+		I2C_CHECK(&_is_i2c_addr, I2C_DEFAULT_DELAY);
 
 		//Заплатка из Errata
 		disableInterrupts();
@@ -167,7 +122,7 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		enableInterrupts();
 
 		//Ждем прихода данных в RD
-		wait_event(!(I2C->SR1 & I2C_SR1_RXNE), 1);
+		I2C_CHECK(&_is_i2c_rxne, I2C_DEFAULT_DELAY);
 
 		//Читаем принятый байт
 		*data = I2C->DR;
@@ -175,7 +130,7 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		//Бит который разрешает NACK на следующем принятом байте
 		I2C->CR2 |= I2C_CR2_POS;
 		//Ждем подтверждения передачи адреса
-		wait_event(!(I2C->SR1 & I2C_SR1_ADDR), 1);
+		I2C_CHECK(&_is_i2c_addr, I2C_DEFAULT_DELAY);
 		//Заплатка из Errata
 		disableInterrupts();
 		//Очистка бита ADDR чтением регистра SR3
@@ -186,7 +141,7 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		enableInterrupts();
 		//Ждем момента, когда первый байт окажется в DR,
 		//а второй в сдвиговом регистре
-		wait_event(!(I2C->SR1 & I2C_SR1_BTF), 1);
+		I2C_CHECK(&_is_i2c_btf, I2C_DEFAULT_DELAY);
 
 		//Заплатка из Errata
 		disableInterrupts();
@@ -199,7 +154,7 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		*data = I2C->DR;
 	} else if(length > 2) { //N>2
 		//Ждем подтверждения передачи адреса
-		wait_event(!(I2C->SR1 & I2C_SR1_ADDR), 1);
+		I2C_CHECK(&_is_i2c_addr, I2C_DEFAULT_DELAY);
 
 		//Заплатка из Errata
 		disableInterrupts();
@@ -210,22 +165,17 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		//Заплатка из Errata
 		enableInterrupts();
 
-		while(length-- > 3 && tmo){
+		while(length-- > 3){
 			//Ожидаем появления данных в DR и сдвиговом регистре
-			wait_event(!(I2C->SR1 & I2C_SR1_BTF), 1);
+			I2C_CHECK(&_is_i2c_btf, I2C_DEFAULT_DELAY);
 			//Читаем принятый байт из DR
 			*data++ = I2C->DR;
-		}
-
-		//Время таймаута вышло
-		if(!tmo) {
-			return I2C_TIMEOUT;
 		}
 
 		//Осталось принять 3 последних байта
 		//Ждем, когда в DR окажется N-2 байт, а в сдвиговом регистре
 		//окажется N-1 байт
-		wait_event(!(I2C->SR1 & I2C_SR1_BTF), 1);
+		I2C_CHECK(&_is_i2c_btf, I2C_DEFAULT_DELAY);
 		//Запрещаем подтверждение в конце посылки
 		I2C->CR2 &= ~I2C_CR2_ACK;
 		//Заплатка из Errata
@@ -240,15 +190,56 @@ t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_
 		//Заплатка из Errata
 		enableInterrupts();
 		//Ждем, когда N-й байт попадет в DR из сдвигового регистра
-		wait_event(!(I2C->SR1 & I2C_SR1_RXNE), 1);
+		I2C_CHECK(&_is_i2c_rxne, I2C_DEFAULT_DELAY);
 		//Читаем N байт
 		*data++ = I2C->DR;
 	}
 
 	//Ждем отправки СТОП посылки
-	wait_event((I2C->CR2 & I2C_CR2_STOP), 1);
+	I2C_CHECK(&_is_i2c_stop, I2C_DEFAULT_DELAY);
 	//Сбрасывает бит POS, если вдруг он был установлен
 	I2C->CR2 &= ~I2C_CR2_POS;
 
 	return I2C_SUCCESS;
+}
+
+bool _is_i2c_free()
+{
+	return !(I2C->SR3 & I2C_SR3_BUSY);
+}
+
+bool _is_i2c_sb()
+{
+	return I2C->SR1 & I2C_SR1_SB;
+}
+
+bool _is_i2c_addr()
+{
+	return I2C->SR1 & I2C_SR1_ADDR;
+}
+
+bool _is_i2c_txe()
+{
+	return I2C->SR1 & I2C_SR1_TXE;
+}
+
+bool _is_i2c_btf()
+{
+	return I2C->SR1 & I2C_SR1_BTF;
+}
+
+
+bool _is_i2c_txe_and_btf()
+{
+	return _is_i2c_txe() && _is_i2c_btf();
+}
+
+bool _is_i2c_rxne()
+{
+	return I2C->SR1 & I2C_SR1_RXNE;
+}
+
+bool _is_i2c_stop()
+{
+	return !(I2C->CR2 & I2C_CR2_STOP);
 }
