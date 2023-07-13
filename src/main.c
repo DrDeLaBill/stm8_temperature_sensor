@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "adt7420.h"
 #include "modbus_manager.h"
+#include "eeprom.h"
 
 
 void system_clock_init();
@@ -15,6 +16,7 @@ void gpio_init();
 
 
 volatile uint32_t Global_time   = 0; // global time in ms
+uint8_t sensor_modbus_id = 0;
 
 
 int main(void)
@@ -23,6 +25,12 @@ int main(void)
     tim_init();
     gpio_init();
     adt7420_init();
+
+    eeprom_read(EEPROM_START_ADDR, &sensor_modbus_id, 1);
+    if (sensor_modbus_id > MAX_SLAVE_ID || sensor_modbus_id == 0) {
+      sensor_modbus_id = DEFAULT_DEVICE_ID;
+    }
+
     modbus_manager_init();
     iwdg_init();
 

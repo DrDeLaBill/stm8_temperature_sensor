@@ -5,7 +5,8 @@
         "main.h": "c",
         "mb-table.h": "c",
         "i2c.h": "c",
-        "mb.h": "c"
+        "mb.h": "c",
+        "stm8s_flash.h": "c"
     },
     "cmake.configureOnOpen": true
 }

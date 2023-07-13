@@ -41,7 +41,7 @@ extern "C" {
 #define MB_ENABLE_FUNC_Read_Holding_Registers   1
 #define MB_ENABLE_FUNC_Read_Input_Registers     0
 #define MB_ENABLE_FUNC_Write_Single_Coil        0
-#define MB_ENABLE_FUNC_Write_Single_Register    0
+#define MB_ENABLE_FUNC_Write_Single_Register    1
 #define MB_ENABLE_FUNC_Write_Multiple_Coils     0
 #define MB_ENABLE_FUNC_Write_Multiple_Registers 0
 

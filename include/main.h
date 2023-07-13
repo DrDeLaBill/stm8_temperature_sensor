@@ -7,10 +7,13 @@
 
 
 // Config
-#define F_MASTER_MHZ          16UL
-#define F_MASTER_HZ           16000000UL
+#define F_MASTER_MHZ          1UL
+#define F_MASTER_HZ           1000000UL
 // Sensor
-#define SLAVE_DEVICE_ID    0x01
+#define DEFAULT_DEVICE_ID     0x01
+#define TEMPERATURE_REGISTER  0x0000 // holding register
+#define SLAVE_ID_REGISTER     0x0000 // input register
+#define MAX_SLAVE_ID          0x80
 // CLK
 #define CLK_PRESCALER_HSIDIV1 (uint8_t)0x00
 #define CLK_PRESCALER_CPUDIV1 (uint8_t)0x80, /*!< CPU clock division factors 1 */
@@ -28,6 +31,11 @@
 #define CLK_PERIPHERAL_UART1   (uint8_t)0x03 /*!< Peripheral Clock Enable 1, UART1 */
 #define CLK_PERIPHERAL_I2C     (uint8_t)0x00 /*!< Peripheral Clock Enable 1, I2C */
 #define CLK_PERIPHERAL_TIMER1  (uint8_t)0x07 /*!< Peripheral Clock Enable 1, Timer1 */
+// EEPROM
+#define _MEM_(mem_addr)         (*(volatile uint8_t *)(mem_addr))
+
+#define EEPROM_START_ADDR       0x4000
+#define EEPROM_END_ADDR         0x407F
 // TIM1
 #define TIM_PRESCALER             (uint16_t)1000
 #define TIM_PERIOD                (uint16_t)160
@@ -125,6 +133,7 @@ uint32_t get_clock_freq();
 
 
 extern volatile uint32_t Global_time;
+extern uint8_t sensor_modbus_id;
 
 
 #endif

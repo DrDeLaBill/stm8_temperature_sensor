@@ -19,10 +19,16 @@ void adt7420_proccess()
   adt7420_delay = Global_time;
   int16_t tempr = 0;
   t_i2c_status status = adt7420_get_temperature(&tempr);
+  int16_t res = 0;
   if (status != I2C_SUCCESS) {
     tempr = 0;
+  } else {
+    uint16_t buf = (((uint16_t)((tempr & 0xFF00) >> 8) & 0x7F) << 5) | ((uint8_t)(tempr & 0x00FF) >> 3);
+    res = (int16_t)((buf * 10) / 16);
+    bool sign = 0x80 & ((tempr & 0xFF00) >> 8);
+    res *= (sign ? -1 : 1);
   }
-  mb_table_write(TABLE_Holding_Registers, 0, tempr);
+  mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, tempr);
 }
 
 t_i2c_status adt7420_init()
