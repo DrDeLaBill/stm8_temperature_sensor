@@ -40,7 +40,7 @@ void modbus_proccess()
     if (!modbus_data.length) {
         return;
     }
-    if (ABS_DIF(modbus_data.start_time, Global_time) > MODBUS_WAIT_TIME) {
+    if (abs_dif(modbus_data.start_time, Global_time) > MODBUS_TIMEOUT_MS) {
         mb_rx_timeout_handler();
         _clear_data();
         return;
@@ -77,7 +77,7 @@ void _send_response()
 
     uart1_state = UART1_SEND;
     uart_tx_data(modbus_data.data, modbus_data.length);
-    DELAY_MS(3);
+    delay_ms(3);
     MODBUS_CHECK(&_is_modbus_txe, MODBUS_DEFAULT_DELAY);
 
     uart1_state = UART1_RECIEVE;

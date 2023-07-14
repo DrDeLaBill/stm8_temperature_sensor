@@ -6,7 +6,9 @@
         "mb-table.h": "c",
         "i2c.h": "c",
         "mb.h": "c",
-        "stm8s_flash.h": "c"
+        "stm8s_flash.h": "c",
+        "stm8s_it.h": "c",
+        "stm8s.h": "c"
     },
     "cmake.configureOnOpen": true
 }

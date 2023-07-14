@@ -9,12 +9,28 @@
 bool wait_event(bool (*condition) (void), uint32_t time)
 {
     uint32_t start_time = Global_time;
-    while (ABS_DIF(start_time, Global_time) < time) {
+    while (abs_dif(start_time, Global_time) < time) {
         if (condition()) {
             return TRUE;
         }
     }
     return FALSE;
+}
+
+void delay_ms(uint32_t time) 
+{
+    uint32_t start_time = Global_time; 
+    while (abs_dif(start_time, Global_time) < time);
+}
+
+int32_t abs_dif(int32_t first_n, int32_t second_n)
+{
+    return (int32_t)(((first_n) > (second_n)) ? ((first_n) - (second_n)) : ((second_n) - (first_n)));
+}
+
+int32_t abs(int32_t number)
+{
+    return (int32_t)(((number) < 0) ? (-1 * (number)) : (number));
 }
 
 uint32_t get_clock_freq()

@@ -6,17 +6,16 @@
 #include "stm8s.h"
 
 
-// Config
-#define F_MASTER_MHZ          1UL
-#define F_MASTER_HZ           1000000UL
 // Sensor
 #define DEFAULT_DEVICE_ID     0x01
 #define TEMPERATURE_REGISTER  0x0000 // holding register
 #define SLAVE_ID_REGISTER     0x0000 // input register
 #define MAX_SLAVE_ID          0x80
 // CLK
-#define CLK_PRESCALER_HSIDIV1 (uint8_t)0x00
-#define CLK_PRESCALER_CPUDIV1 (uint8_t)0x80, /*!< CPU clock division factors 1 */
+#define CLK_ICKR_HSI_EN       (uint8_t)0x01
+#define CLK_ICKR_HSI_RDY      (uint8_t)0x02
+#define CLK_PRESCALER_HSIDIV  (uint8_t)0x18
+#define CLK_PRESCALER_CPUDIV  (uint8_t)0x01   /*!< CPU clock division factors 1 */
 #define CLK_CCOR_CCOEN        ((uint8_t)0x01) /*!< Configurable clock output enable */
 #define CLK_PCKENR1_TIM1      ((uint8_t)0x80) /*!< Timer 1 clock enable */ 
 #define CLK_PCKENR1_TIM2      ((uint8_t)0x20) /*!< Timer 2 clock enable */
@@ -38,7 +37,7 @@
 #define EEPROM_END_ADDR         0x407F
 // TIM1
 #define TIM_PRESCALER             (uint16_t)1000
-#define TIM_PERIOD                (uint16_t)160
+#define TIM_PERIOD                (uint16_t)10
 #define TIM_REP_COUNTER           (uint8_t)0x00
 #define TIM1_COUNTERMODE_DOWN     ((uint8_t)0x10)
 #define TIM1_PSCRELOADMODE_UPDATE ((uint8_t)0x00)
@@ -118,18 +117,15 @@
 #define SET16BITMODE       0b10100000
 #define F_I2C_HZ           100000UL
 // ADT7420
-#define ADT7420_DELAY      (uint32_t)1000
+#define ADT7420_DELAY            (uint32_t)1000
 // MODBUS
-#define MODBUS_WAIT_TIME   (uint32_t)1000
+#define MODBUS_TIMEOUT_MS        (uint32_t)1000
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */
 #define IWDG_Prescaler_128       ((uint8_t)0x05) /*!< Used to set prescaler register to 128 */
 #define IWDG_WriteAccess_Disable ((uint8_t)0x00) /*!< Code 0x00 in Key register, not allow write access to Prescaler and Reload registers */
 #define IWDG_KEY_REFRESH         ((uint8_t)0xAA)  /*!<  This value written in the Key register prevent the watchdog reset */
-
-
-uint32_t get_clock_freq();
 
 
 extern volatile uint32_t Global_time;

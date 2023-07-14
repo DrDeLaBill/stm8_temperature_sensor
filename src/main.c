@@ -15,7 +15,7 @@ void system_clock_init();
 void gpio_init();
 
 
-volatile uint32_t Global_time   = 0; // global time in ms
+volatile uint32_t Global_time = 0; // global time in ms
 uint8_t sensor_modbus_id = 0;
 
 
@@ -32,12 +32,12 @@ int main(void)
     }
 
     modbus_manager_init();
-    iwdg_init();
+    // iwdg_init();
 
     enableInterrupts();
 
     while (1) {
-      iwdg_reload();
+      // iwdg_reload();
       adt7420_proccess();
       modbus_proccess();
     }
@@ -47,15 +47,16 @@ int main(void)
 
 void  system_clock_init()
 {
-  CLK->ICKR |= ENABLE;
+  CLK->ICKR &= 0x00;
+  CLK->ICKR |= CLK_ICKR_HSI_EN;
+
+  while(!(CLK->ICKR & CLK_ICKR_HSI_RDY));
 
   /* Clear High speed internal clock prescaler */
-  CLK->CKDIVR &= (uint8_t)(~CLK_CKDIVR_HSIDIV);
+  CLK->CKDIVR &= 0x00;
   /* Set High speed internal clock prescaler */
-  CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV1;
-
-  CLK->CKDIVR &= (uint8_t)(~CLK_CKDIVR_CPUDIV);
-  CLK->CKDIVR |= (uint8_t)((uint8_t)0x80 & (uint8_t)CLK_CKDIVR_CPUDIV);
+  CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV;
+  CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_CPUDIV;
 
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F));
