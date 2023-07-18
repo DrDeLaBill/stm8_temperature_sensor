@@ -5,7 +5,7 @@
 #include "mb-table.h"
 #include "uart.h"
 #include "utils.h"
-#include "eeprom.h"
+#include "settings.h"
 
 
 #define MODBUS_DEFAULT_DELAY          5
@@ -14,7 +14,7 @@
 
 void _modbus_data_handler(uint8_t * data, uint8_t len);
 void _send_response();
-void _write_new_id(uint8_t new_id);
+void _update_mb_id_proccess();
 void _clear_data();
 bool _is_MAX485_ready();
 bool _is_modbus_txe();
@@ -26,16 +26,16 @@ modbus_data_status modbus_data;
 void modbus_manager_init()
 {
     uart_init(UART_BAUD_RATE, get_clock_freq());
-    mb_slave_address_set(sensor_modbus_id);
+    mb_slave_address_set(sttngs.mb_id);
     mb_set_tx_handler(&_modbus_data_handler);
     _clear_data();
+
+    mb_table_write(TABLE_Holding_Registers, SLAVE_ID_REGISTER, sttngs.mb_id);
 }
 
 void modbus_proccess()
 {
-    if (sensor_modbus_id != TBALE_Input_Registers[SLAVE_ID_REGISTER]) {
-        _write_new_id(TBALE_Input_Registers[SLAVE_ID_REGISTER]);
-    }
+    _update_mb_id_proccess();
 
     if (!modbus_data.length) {
         return;
@@ -49,13 +49,13 @@ void modbus_proccess()
     _clear_data();
 }
 
-void _write_new_id(uint8_t new_id) {
-    if (new_id > MAX_SLAVE_ID || new_id == 0) {
-        return;
+void _update_mb_id_proccess() 
+{
+    if (sttngs.mb_id != TABLE_Holding_Registers[SLAVE_ID_REGISTER]) {
+        update_mb_id(TABLE_Holding_Registers[SLAVE_ID_REGISTER]);
+        mb_slave_address_set(sttngs.mb_id);
+        mb_table_write(TABLE_Holding_Registers, SLAVE_ID_REGISTER, sttngs.mb_id);
     }
-    eeprom_write(EEPROM_START_ADDR, &new_id, 1);
-    sensor_modbus_id = new_id;
-    mb_slave_address_set(new_id);
 }
 
 void _modbus_data_handler(uint8_t * data, uint8_t len)

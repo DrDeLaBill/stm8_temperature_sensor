@@ -16,12 +16,6 @@ bool adt_init_success = true;
 
 void adt7420_proccess()
 {
-  // remove begin
-  uint8_t tmp = 0x00;
-  t_i2c_status tmp_status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_STATUS, &tmp, 1);
-  mb_table_write(TABLE_Holding_Registers, 0x0002, tmp);
-  // remove end
-
   if (!adt_init_success) {
     mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, 0xFFFF);
     return;

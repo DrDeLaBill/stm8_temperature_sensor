@@ -23,12 +23,12 @@ void delay_ms(uint32_t time)
     while (abs_dif(start_time, Global_time) < time);
 }
 
-int32_t abs_dif(int32_t first_n, int32_t second_n)
+uint32_t abs_dif(int32_t first_n, int32_t second_n)
 {
     return (int32_t)(((first_n) > (second_n)) ? ((first_n) - (second_n)) : ((second_n) - (first_n)));
 }
 
-int32_t abs(int32_t number)
+uint32_t abs(int32_t number)
 {
     return (int32_t)(((number) < 0) ? (-1 * (number)) : (number));
 }
@@ -49,4 +49,16 @@ uint32_t get_clock_freq()
   clock_frequency = HSI_VALUE / presc;
 
   return ((uint32_t)clock_frequency);
+}
+
+uint8_t get_crc8(uint8_t* buffer, uint16_t size) {
+  uint8_t crc = 0;
+  for (uint16_t i = 0; i < size; i++) {
+	uint8_t data = buffer[i];
+	for (uint16_t j = 8; j > 0; j--) {
+	  crc = ((crc ^ data) & 1) ? (crc >> 1) ^ 0x8C : (crc >> 1);
+	  data >>= 1;
+	}
+  }
+  return crc;
 }

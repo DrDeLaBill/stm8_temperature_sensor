@@ -8,7 +8,11 @@
         "mb.h": "c",
         "stm8s_flash.h": "c",
         "stm8s_it.h": "c",
-        "stm8s.h": "c"
+        "stm8s.h": "c",
+        "eeprom.h": "c",
+        "utils.h": "c",
+        "settings.h": "c",
+        "stdint.h": "c"
     },
     "cmake.configureOnOpen": true
 }

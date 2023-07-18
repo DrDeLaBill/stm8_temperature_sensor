@@ -11,7 +11,8 @@ void tim_init()
     TIM1->ARRH = (uint8_t)(1 >> 8);
     TIM1->ARRL = (uint8_t)(1);
     /* Set the Prescaler value */
-    uint16_t presc = (get_clock_freq() / 2000) - 1;
+    uint32_t hsi_divider = get_clock_freq() / 2000;
+    uint32_t presc = (get_clock_freq() / hsi_divider) - 1;
     TIM1->PSCRH = (uint8_t)(presc >> 8);
     TIM1->PSCRL = (uint8_t)(presc);
     /* Select the Counter Mode */

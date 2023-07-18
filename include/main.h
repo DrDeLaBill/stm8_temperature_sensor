@@ -9,7 +9,7 @@
 // Sensor
 #define DEFAULT_DEVICE_ID     0x01
 #define TEMPERATURE_REGISTER  0x0000 // holding register
-#define SLAVE_ID_REGISTER     0x0000 // input register
+#define SLAVE_ID_REGISTER     0x0001 // input register
 #define MAX_SLAVE_ID          0x80
 // CLK
 #define CLK_ICKR_HSI_EN       (uint8_t)0x01
@@ -33,7 +33,7 @@
 // EEPROM
 #define _MEM_(mem_addr)         (*(volatile uint8_t *)(mem_addr))
 
-#define EEPROM_START_ADDR       0x4000
+#define EEPROM_START_ADDR       0x4010
 #define EEPROM_END_ADDR         0x407F
 // TIM1
 #define TIM_PRESCALER             (uint16_t)1000
@@ -123,7 +123,7 @@
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */
-#define IWDG_Prescaler_128       ((uint8_t)0x05) /*!< Used to set prescaler register to 128 */
+#define IWDG_Prescaler_32        ((uint8_t)0x03) /*!< Used to set prescaler register to 32 */
 #define IWDG_WriteAccess_Disable ((uint8_t)0x00) /*!< Code 0x00 in Key register, not allow write access to Prescaler and Reload registers */
 #define IWDG_KEY_REFRESH         ((uint8_t)0xAA)  /*!<  This value written in the Key register prevent the watchdog reset */
 
