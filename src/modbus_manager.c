@@ -1,5 +1,7 @@
 #include "modbus_manager.h"
 
+#include <string.h>
+
 #include "main.h"
 #include "mb.h"
 #include "mb-table.h"
@@ -23,6 +25,8 @@ bool _is_MAX485_free();
 
 modbus_data_status modbus_data;
 
+
+
 void modbus_manager_init()
 {
     uart_init(UART_BAUD_RATE, get_clock_freq());
@@ -37,12 +41,12 @@ void modbus_proccess()
 {
     _update_mb_id_proccess();
 
-    if (!modbus_data.length) {
-        return;
-    }
-    if (abs_dif(modbus_data.start_time, Global_time) > MODBUS_TIMEOUT_MS) {
+    if (modbus_data.wait_request_byte && abs_dif(modbus_data.start_time, Global_time) > MODBUS_TIMEOUT_MS) {
         mb_rx_timeout_handler();
         _clear_data();
+        return;
+    }
+    if (!modbus_data.length) {
         return;
     }
     _send_response();
@@ -52,9 +56,8 @@ void modbus_proccess()
 void _update_mb_id_proccess() 
 {
     if (sttngs.mb_id != TABLE_Holding_Registers[SLAVE_ID_REGISTER]) {
-        update_mb_id(TABLE_Holding_Registers[SLAVE_ID_REGISTER]);
+        sttngs_update_mb_id(TABLE_Holding_Registers[SLAVE_ID_REGISTER]);
         mb_slave_address_set(sttngs.mb_id);
-        mb_table_write(TABLE_Holding_Registers, SLAVE_ID_REGISTER, sttngs.mb_id);
     }
 }
 
@@ -72,6 +75,12 @@ void _modbus_data_handler(uint8_t * data, uint8_t len)
 
 void _send_response()
 {
+    if (modbus_data.length > sizeof(modbus_data.data)) {
+        mb_rx_timeout_handler();
+        _clear_data();
+        return;
+    }
+
     GPIOD->ODR |= (uint8_t)(MAX485_PIN);
     MODBUS_CHECK(&_is_MAX485_free, MODBUS_DEFAULT_DELAY);
 
@@ -87,10 +96,7 @@ void _send_response()
 
 void _clear_data()
 {
-    for (uint8_t i = 0; i < sizeof(modbus_data.data); i++) {
-        modbus_data.data[i] = 0;
-    }
-    modbus_data.length = 0;
+    memset((uint8_t*)&modbus_data, 0, sizeof(modbus_data));
     modbus_data.start_time = Global_time;
 }
 

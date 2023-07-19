@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 
+#include "stm8s.h"
 #include "mb-table.h"
 
 
@@ -14,6 +15,7 @@ typedef struct modbus_data_status_typedef {
     uint8_t data[TABLE_Holding_Registers_Size + 10];
     uint8_t length;
     uint32_t start_time;
+    bool wait_request_byte;
 } modbus_data_status;
 
 

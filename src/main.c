@@ -9,7 +9,6 @@
 #include "adt7420.h"
 #include "modbus_manager.h"
 #include "settings.h"
-#include "mb-table.h"
 
 
 void system_clock_init();
@@ -23,9 +22,6 @@ int main(void)
 {
     system_clock_init();
     tim_init();
-
-    // delay_ms(10);
-
     gpio_init();
     adt7420_init();
 
@@ -60,9 +56,11 @@ void  system_clock_init()
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV;
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_CPUDIV;
 
+  CLK->PCKENR1 = 0x00;
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F));
   CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F));
+  CLK->PCKENR2 = 0x00;
 }
 
 void gpio_init()

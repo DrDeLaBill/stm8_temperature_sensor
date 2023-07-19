@@ -51,7 +51,7 @@ void sttngs_save() {
     eeprom_write(EEPROM_START_ADDR, (uint8_t*)&sttngs, sizeof(sttngs));
 }
 
-void update_mb_id(uint8_t new_id) {
+void sttngs_update_mb_id(uint8_t new_id) {
     if (new_id > MAX_SLAVE_ID || new_id == 0) {
         return;
     }

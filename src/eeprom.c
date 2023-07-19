@@ -2,10 +2,10 @@
 
 #include <string.h>
 
-#include "stm8s_flash.h"
 #include "stm8s.h"
 #include "main.h"
 #include "utils.h"
+#include "iwdg.h"
 
 
 #define FLASH_RASS_KEY1 ((uint8_t)0x56) /*!< First RASS key */
@@ -24,10 +24,12 @@ bool eeprom_write(uint16_t addr, uint8_t *buf, uint16_t len) {
     FLASH->DUKR = FLASH_RASS_KEY2;
     FLASH->DUKR = FLASH_RASS_KEY1;
 
+    iwdg_reload();
     EEPROM_WAIT_WHILE(&_if_IAPSR_DUL, EEPROM_TIMEOUT);
 
     /* write data from buffer */
     for (uint16_t i = 0; i < len; i++, addr++) {
+        iwdg_reload();
         _MEM_(addr) = buf[i];
         EEPROM_WAIT_WHILE(&_if_IAPSR_EOP, EEPROM_TIMEOUT);
     }

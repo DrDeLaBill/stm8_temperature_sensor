@@ -386,6 +386,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
     return;
   }
   modbus_data.start_time = Global_time;
+  modbus_data.wait_request_byte = TRUE;
   mb_rx_new_data((uint8_t)UART1->DR);
 }
 #endif /*STM8S105 || STM8S001 */

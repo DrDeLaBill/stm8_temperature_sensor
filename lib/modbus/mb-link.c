@@ -166,7 +166,9 @@ void mb_link_check_new_data(uint8_t Byte)
                     if(mb_crc_check(MB_LINK_Rx_Buffer,MB_LINK_Rx_Buffer_Index)==MB_CRC_OK)
                     {
                         // OK
-                        mb_rx_packet_handler(mb_rx_packet_split(MB_LINK_Rx_Buffer,MB_LINK_Packet_Type));
+                        mb_packet_s tmpPacket = {0};
+                        mb_rx_packet_split(&tmpPacket, MB_LINK_Rx_Buffer, MB_LINK_Packet_Type);
+                        mb_rx_packet_handler(&tmpPacket);
                     }
                     else mb_link_error_handler(MB_LINK_ERROR_CRC);
                     mb_link_reset_rx_buffer();
@@ -184,7 +186,9 @@ void mb_link_check_new_data(uint8_t Byte)
                 if(mb_crc_check(MB_LINK_Rx_Buffer,8)==MB_CRC_OK)
                 {
                     // OK
-                    mb_rx_packet_handler(mb_rx_packet_split(MB_LINK_Rx_Buffer,MB_LINK_Packet_Type));
+                    mb_packet_s tmpPacket = {0};
+                    mb_rx_packet_split(&tmpPacket, MB_LINK_Rx_Buffer, MB_LINK_Packet_Type);
+                    mb_rx_packet_handler(&tmpPacket);
                 }
                 else mb_link_error_handler(MB_LINK_ERROR_CRC);
                 mb_link_reset_rx_buffer();
@@ -201,7 +205,9 @@ void mb_link_check_new_data(uint8_t Byte)
                 if(mb_crc_check(MB_LINK_Rx_Buffer,5)==MB_CRC_OK)
                 {
                     // OK
-                    mb_rx_packet_handler(mb_rx_packet_split(MB_LINK_Rx_Buffer,MB_LINK_Packet_Type));
+                    mb_packet_s tmpPacket = {0};
+                    mb_rx_packet_split(&tmpPacket, MB_LINK_Rx_Buffer, MB_LINK_Packet_Type);
+                    mb_rx_packet_handler(&tmpPacket);
                 }
                 else mb_link_error_handler(MB_LINK_ERROR_CRC);
                 mb_link_reset_rx_buffer();

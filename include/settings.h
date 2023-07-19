@@ -24,7 +24,7 @@ void sttngs_reset();
 bool sttngs_load();
 void sttngs_save();
 
-void update_mb_id(uint8_t new_id);
+void sttngs_update_mb_id(uint8_t new_id);
 
 
 #endif

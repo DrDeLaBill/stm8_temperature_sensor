@@ -12,7 +12,8 @@
         "eeprom.h": "c",
         "utils.h": "c",
         "settings.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "mb-link.h": "c"
     },
     "cmake.configureOnOpen": true
 }

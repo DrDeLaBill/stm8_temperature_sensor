@@ -10,6 +10,11 @@
 #include "mb-table.h"
 
 
+#define CONFIG_SLEEP (uint8_t)0b01100000
+#define CONFIG_READ  (uint8_t)0b01000000
+#define STATUS_RDY   (uint8_t)0b10000000
+
+
 uint32_t adt7420_delay = 0;
 bool adt_init_success = true;
 
@@ -24,10 +29,12 @@ void adt7420_proccess()
   if ((uint32_t)abs_dif(Global_time, adt7420_delay) < ADT7420_DELAY) {
     return;
   }
+
   adt7420_delay = Global_time;
   int16_t tempr = 0;
   t_i2c_status status = adt7420_get_temperature(&tempr);
   int16_t res = 0;
+
   if (status != I2C_SUCCESS) {
     res = 0xFFFF;
   } else {
@@ -36,6 +43,7 @@ void adt7420_proccess()
     bool sign = 0x80 & ((tempr & 0xFF00) >> 8);
     res *= (sign ? -1 : 1);
   }
+
   mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, res);
 }
 
@@ -48,7 +56,7 @@ t_i2c_status adt7420_init()
     goto do_error;
   }
 
-  uint8_t conf = 0x00;
+  uint8_t conf = CONFIG_SLEEP;
   status = i2c_wr_reg(I2C_ADT7420_ADDR, ADT7420_CONFIGURATION, &conf, 1);
   if (status != I2C_SUCCESS) {
     goto do_error;

@@ -29,9 +29,9 @@ uint8_t mb_slave_address_get(void)
 
 #elif(MB_MODE==MB_MODE_MASTER)
 
-void mb_set_master_process_handler(void (*f)(mb_packet_s))
+void mb_set_master_process_handler(void (*f) (mb_packet_s*))
 {
-    MB_Config.master_process_handler=f;
+    MB_Config.master_process_handler = f;
 }
 
 #endif

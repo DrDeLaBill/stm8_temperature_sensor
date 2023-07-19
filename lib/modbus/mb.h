@@ -22,7 +22,7 @@ extern "C" {
 
 // Mode Select
 #ifndef MB_MODE
-	#define MB_MODE         MB_MODE_SLAVE
+	#define MB_MODE     (MB_MODE_MASTER ? MB_MODE_MASTER : MB_MODE_SLAVE)
 #endif
 
 // Default SLAVE mode Device Address
@@ -108,7 +108,7 @@ typedef struct{
 	uint8_t address;
 	void (*tx_handler)(uint8_t *,uint8_t);
 	#if(MB_MODE==MB_MODE_MASTER)
-	void (*master_process_handler)(mb_packet_s);
+	void (*master_process_handler)(mb_packet_s*);
 	#endif
 } mb_config_s;
 
@@ -126,7 +126,7 @@ void             mb_error_handler(mb_packet_s* Packet,mb_error_e err);		// Make 
 // If Defined Mode as Master
 #elif(MB_MODE==MB_MODE_MASTER)
 
-void             mb_set_master_process_handler(void (*f)(mb_packet_s));		// Set Callback fot Process Received Packet as Master
+void             mb_set_master_process_handler(void (*f)(mb_packet_s*));		// Set Callback fot Process Received Packet as Master
 
 #endif
 

@@ -123,13 +123,18 @@
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */
+#define IWDG_Prescaler_4         ((uint8_t)0x00) /*!< Used to set prescaler register to 32 */
+#define IWDG_Prescaler_8         ((uint8_t)0x01) /*!< Used to set prescaler register to 32 */
+#define IWDG_Prescaler_16        ((uint8_t)0x02) /*!< Used to set prescaler register to 32 */
 #define IWDG_Prescaler_32        ((uint8_t)0x03) /*!< Used to set prescaler register to 32 */
+#define IWDG_Prescaler_64        ((uint8_t)0x04) /*!< Used to set prescaler register to 32 */
+#define IWDG_Prescaler_128       ((uint8_t)0x05) /*!< Used to set prescaler register to 32 */
+#define IWDG_Prescaler_256       ((uint8_t)0x06) /*!< Used to set prescaler register to 32 */
 #define IWDG_WriteAccess_Disable ((uint8_t)0x00) /*!< Code 0x00 in Key register, not allow write access to Prescaler and Reload registers */
 #define IWDG_KEY_REFRESH         ((uint8_t)0xAA)  /*!<  This value written in the Key register prevent the watchdog reset */
 
 
 extern volatile uint32_t Global_time;
-extern uint8_t sensor_modbus_id;
 
 
 #endif
