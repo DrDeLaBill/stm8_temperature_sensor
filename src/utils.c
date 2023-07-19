@@ -6,10 +6,21 @@
 #include "main.h"
 
 
+void timer_start(timer_t* tm, uint32_t waitMs)
+{
+	tm->start = global_time_ms;
+	tm->delay = waitMs;
+}
+
+bool is_timer_wait(timer_t* tm)
+{
+	return abs(global_time_ms - tm->start) < tm->delay;
+}
+
 bool wait_event(bool (*condition) (void), uint32_t time)
 {
-    uint32_t start_time = Global_time;
-    while (abs_dif(start_time, Global_time) < time) {
+    uint32_t start_time = global_time_ms;
+    while (abs_dif(start_time, global_time_ms) < time) {
         if (condition()) {
             return TRUE;
         }
@@ -19,8 +30,8 @@ bool wait_event(bool (*condition) (void), uint32_t time)
 
 void delay_ms(uint32_t time) 
 {
-    uint32_t start_time = Global_time; 
-    while (abs_dif(start_time, Global_time) < time);
+    uint32_t start_time = global_time_ms; 
+    while (abs_dif(start_time, global_time_ms) < time);
 }
 
 uint32_t abs_dif(int32_t first_n, int32_t second_n)

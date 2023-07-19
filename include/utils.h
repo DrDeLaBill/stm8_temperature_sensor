@@ -6,6 +6,13 @@
 
 #include "stm8s.h"
 
+typedef struct _timer_t {
+	uint32_t start;
+	uint32_t delay;
+} timer_t;
+
+void timer_start(timer_t* tm, uint32_t waitMs);
+bool is_timer_wait(timer_t* tm);
 
 bool wait_event(bool (*condition) (void), uint32_t time);
 uint32_t get_clock_freq();

@@ -27,7 +27,7 @@ bool _is_i2c_stop();
 //******************************************************************************                                   
 void i2c_master_init(uint32_t f_master_hz, uint32_t f_i2c_hz)
 {
-	uint8_t ccr;
+	uint16_t ccr;
 
 	GPIOB->DDR &= ~GPIO_PIN_4;
 	GPIOB->DDR &= ~GPIO_PIN_5;
@@ -64,7 +64,7 @@ void i2c_master_init(uint32_t f_master_hz, uint32_t f_i2c_hz)
 //******************************************************************************
 // Запись регистра slave-устройства
 //******************************************************************************                                   
-t_i2c_status i2c_wr_reg(unsigned char address, unsigned char reg_addr, char *data, unsigned char length)
+i2c_status_t i2c_wr_reg(unsigned char address, unsigned char reg_addr, char *data, unsigned char length)
 {                                                           
 	//Ждем освобождения шины I2C
 	I2C_WAIT_WHILE(&_is_i2c_free, 10);
@@ -111,7 +111,7 @@ t_i2c_status i2c_wr_reg(unsigned char address, unsigned char reg_addr, char *dat
 // Чтение регистра slave-устройства
 // Start -> Slave Addr -> Reg. addr -> Restart -> Slave Addr <- data ... -> Stop 
 //******************************************************************************                                   
-t_i2c_status i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_t length)
+i2c_status_t i2c_rd_reg(uint8_t address, uint8_t reg_addr, uint8_t* data, uint8_t length)
 {
 	//Ждем освобождения шины I2C
 	I2C_WAIT_WHILE(&_is_i2c_free, 10);

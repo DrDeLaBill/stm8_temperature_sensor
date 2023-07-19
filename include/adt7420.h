@@ -3,8 +3,10 @@
 
 #include <stdint.h>
 
+#include "stm8s.h"
 #include "i2c.h"
 #include "main.h"
+#include "utils.h"
 
 
 //******************************************************************************
@@ -34,13 +36,20 @@ typedef enum {
   ADT7420_ID,
 } t_adt7420_reg;
 
+typedef struct _adt7420_state_t {
+  void (*state_action) (void);
+  bool adt_init_success;
+  bool measurments_done;
+  timer_t wait_timer;
+} adt7420_state_t;
+
 //******************************************************************************
 // Прототипы функций
 //******************************************************************************
 void adt7420_proccess();
-t_i2c_status adt7420_init();
-t_i2c_status adt7420_get_temperature(int16_t* value);
-t_i2c_status adt7420_available();
+bool adt7420_is_measurments_done();
+i2c_status_t adt7420_init();
+i2c_status_t adt7420_available();
 
 //******************************************************************************
 // Макросы

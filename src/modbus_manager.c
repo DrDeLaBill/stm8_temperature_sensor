@@ -41,7 +41,7 @@ void modbus_proccess()
 {
     _update_mb_id_proccess();
 
-    if (modbus_data.wait_request_byte && abs_dif(modbus_data.start_time, Global_time) > MODBUS_TIMEOUT_MS) {
+    if (modbus_data.wait_request_byte && !is_timer_wait(&modbus_data.wait_timer)) {
         mb_rx_timeout_handler();
         _clear_data();
         return;
@@ -51,6 +51,19 @@ void modbus_proccess()
     }
     _send_response();
     _clear_data();
+}
+
+void modbus_proccess_byte(uint8_t byte)
+{
+    timer_start(&modbus_data.wait_timer, MODBUS_TIMEOUT_MS);
+    modbus_data.wait_request_byte = TRUE;
+    modbus_data.state_in_progress = TRUE;
+    mb_rx_new_data(byte);
+}
+
+bool is_modbus_busy()
+{
+    return modbus_data.state_in_progress;
 }
 
 void _update_mb_id_proccess() 
@@ -97,7 +110,7 @@ void _send_response()
 void _clear_data()
 {
     memset((uint8_t*)&modbus_data, 0, sizeof(modbus_data));
-    modbus_data.start_time = Global_time;
+    timer_start(&modbus_data.wait_timer, MODBUS_TIMEOUT_MS);
 }
 
 bool _is_MAX485_ready()

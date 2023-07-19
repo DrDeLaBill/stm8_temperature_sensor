@@ -4,7 +4,6 @@
 #include "stm8s_it.h"
 
 #include "tim.h"
-#include "iwdg.h"
 #include "utils.h"
 #include "adt7420.h"
 #include "modbus_manager.h"
@@ -13,9 +12,11 @@
 
 void system_clock_init();
 void gpio_init();
+bool _check_sensor_need_sleep();
+void _enable_periph_clk();
 
 
-volatile uint32_t Global_time = 0; // global time in ms
+volatile uint32_t global_time_ms = 0;
 
 
 int main(void)
@@ -30,20 +31,47 @@ int main(void)
     }
     
     modbus_manager_init();
-    iwdg_init();
 
     enableInterrupts();
 
+    sensor_sleep();
+
     while (1) {
-      iwdg_reload();
       adt7420_proccess();
       modbus_proccess();
+      if (_check_sensor_need_sleep()) {
+        sensor_sleep();
+      }
     }
 
     return 0;
 }
 
-void  system_clock_init()
+void sensor_sleep() 
+{
+  CLK->PCKENR1 = (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
+  wfi();
+}
+
+void sensor_wake_up()
+{
+  _enable_periph_clk();
+}
+
+bool _check_sensor_need_sleep()
+{
+  return adt7420_is_measurments_done() && !is_modbus_busy();
+}
+
+void _enable_periph_clk() 
+{
+  CLK->PCKENR1 = ((uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F))
+               | (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
+               | (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)));
+  CLK->PCKENR2 = 0x00;
+}
+
+void system_clock_init()
 {
   CLK->ICKR &= 0x00;
   CLK->ICKR |= CLK_ICKR_HSI_EN;
@@ -56,11 +84,7 @@ void  system_clock_init()
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV;
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_CPUDIV;
 
-  CLK->PCKENR1 = 0x00;
-  CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
-  CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F));
-  CLK->PCKENR1 |= (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F));
-  CLK->PCKENR2 = 0x00;
+  _enable_periph_clk();
 }
 
 void gpio_init()

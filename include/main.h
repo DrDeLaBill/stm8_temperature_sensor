@@ -119,7 +119,7 @@
 // ADT7420
 #define ADT7420_DELAY            (uint32_t)1000
 // MODBUS
-#define MODBUS_TIMEOUT_MS        (uint32_t)1000
+#define MODBUS_TIMEOUT_MS        (uint32_t)500
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */
@@ -134,7 +134,11 @@
 #define IWDG_KEY_REFRESH         ((uint8_t)0xAA)  /*!<  This value written in the Key register prevent the watchdog reset */
 
 
-extern volatile uint32_t Global_time;
+extern volatile uint32_t global_time_ms;
+
+
+void sensor_sleep();
+void sensor_wake_up();
 
 
 #endif

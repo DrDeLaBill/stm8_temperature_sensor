@@ -30,7 +30,6 @@
 
 #include "main.h"
 #include "uart.h"
-#include "mb.h"
 #include "modbus_manager.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -255,7 +254,7 @@ INTERRUPT_HANDLER(TIM1_UPD_OVF_TRG_BRK_IRQHandler, 11)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
-  Global_time++;
+  global_time_ms++;
   TIM1->SR1 &= ~(TIM1_SR1_UIF | TIM1_SR1_CC1IF);
 }
 
@@ -381,13 +380,12 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  sensor_wake_up();
   if (uart1_state == UART1_SEND) {
     UART1->DR;
     return;
   }
-  modbus_data.start_time = Global_time;
-  modbus_data.wait_request_byte = TRUE;
-  mb_rx_new_data((uint8_t)UART1->DR);
+  modbus_proccess_byte((uint8_t)UART1->DR);
 }
 #endif /*STM8S105 || STM8S001 */
 
