@@ -1,11 +1,11 @@
 #include "adt7420.h"
 
-#include "stm8s.h"
+#include <stdbool.h>
+
 #include "i2c.h"
 #include "main.h"
 #include "utils.h"
-#include "mb.h"
-#include "mb-table.h"
+#include "modbus_rtu_slave.h"
 
 
 #define MEASURE_DELAY_MS (uint32_t)1000 
@@ -18,11 +18,11 @@
 adt7420_state_t adt7420_state;
 
 
-void _fmt_adt7420_state_enable_sens();
-void _fmt_adt7420_state_wait_measure();
-void _fmt_adt7420_state_save_measure();
-void _fmt_adt7420_state_disable_sens();
-void _fmt_adt7420_state_wait();
+void _fsm_adt7420_state_enable_sens();
+void _fsm_adt7420_state_wait_measure();
+void _fsm_adt7420_state_save_measure();
+void _fsm_adt7420_state_disable_sens();
+void _fsm_adt7420_state_wait();
 
 void _adt7420_set_action(void (*new_action) (void));
 void _adt7420_clear_state();
@@ -34,7 +34,7 @@ i2c_status_t _adt7420_set_sensor_enable_status(bool enabled);
 
 i2c_status_t adt7420_init()
 {
-  adt7420_state.adt_init_success = TRUE;
+  adt7420_state.adt_init_success = true;
 
   i2c_master_init(get_clock_freq(), F_I2C_HZ);
   
@@ -43,7 +43,7 @@ i2c_status_t adt7420_init()
     goto do_error;
   }
 
-  status = _adt7420_set_sensor_enable_status(FALSE);
+  status = _adt7420_set_sensor_enable_status(false);
   if (status != I2C_SUCCESS) {
     goto do_error;
   }
@@ -51,7 +51,7 @@ i2c_status_t adt7420_init()
   goto do_exit;
 
 do_error:
-  adt7420_state.adt_init_success = FALSE;
+  adt7420_state.adt_init_success = false;
   goto do_exit;
 
 do_exit:
@@ -61,7 +61,7 @@ do_exit:
 void adt7420_proccess()
 {
   if (!adt7420_state.adt_init_success) {
-    mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, 0xFFFF);
+    _adt7420_set_error_temp();
     return;
   }
 
@@ -131,54 +131,51 @@ i2c_status_t _adt7420_get_sensor_status(uint8_t* value)
 
 void _adt7420_clear_state() 
 {
-  adt7420_state.measurments_done = FALSE;
-  _adt7420_set_action(&_fmt_adt7420_state_enable_sens);
+  adt7420_state.measurments_done = false;
+  _adt7420_set_action(&_fsm_adt7420_state_enable_sens);
 }
 
 void _adt7420_set_error_temp()
 {
-    mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, 0xFFFF);
+  set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, TEMPERATURE_REGISTER, 0xFFFF);
 }
 
 void _adt7420_set_action(void (*new_action) (void))
 {
-  if (new_action == _fmt_adt7420_state_enable_sens ||
-      new_action == _fmt_adt7420_state_wait_measure ||
-      new_action == _fmt_adt7420_state_save_measure ||
-      new_action == _fmt_adt7420_state_disable_sens ||
-      new_action == _fmt_adt7420_state_wait) 
+  if (new_action == _fsm_adt7420_state_enable_sens ||
+      new_action == _fsm_adt7420_state_wait_measure ||
+      new_action == _fsm_adt7420_state_save_measure ||
+      new_action == _fsm_adt7420_state_disable_sens ||
+      new_action == _fsm_adt7420_state_wait) 
   {
     adt7420_state.state_action = new_action;
   } else {
-    adt7420_state.state_action = &_fmt_adt7420_state_enable_sens;
+    adt7420_state.state_action = &_fsm_adt7420_state_enable_sens;
   }
   timer_start(&adt7420_state.wait_timer, MEASURE_DELAY_MS);
 }
 
-void _fmt_adt7420_state_enable_sens() 
+void _fsm_adt7420_state_enable_sens() 
 {
-  if (_adt7420_set_sensor_enable_status(TRUE) == I2C_SUCCESS) {
-    _adt7420_set_action(&_fmt_adt7420_state_wait_measure);
+  if (_adt7420_set_sensor_enable_status(true) == I2C_SUCCESS) {
+    _adt7420_set_action(&_fsm_adt7420_state_wait_measure);
   } else {
     _adt7420_set_error_temp();
   }
 }
 
-void _fmt_adt7420_state_wait_measure()
+void _fsm_adt7420_state_wait_measure()
 {
-  if (TABLE_Holding_Registers[TEMPERATURE_REGISTER] < 0x02) {
-    mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, 0x02);
-  }
   uint8_t status = 0x00;
   if (_adt7420_get_sensor_status(&status) != I2C_SUCCESS) {
     return;
   }
   if (!(status & STATUS_RDY)) {
-    _adt7420_set_action(&_fmt_adt7420_state_save_measure);
+    _adt7420_set_action(&_fsm_adt7420_state_save_measure);
   }
 }
 
-void _fmt_adt7420_state_save_measure()
+void _fsm_adt7420_state_save_measure()
 {
   int16_t temperature = 0x0000;
   if (_adt7420_get_temperature(&temperature) == I2C_SUCCESS) {
@@ -186,18 +183,18 @@ void _fmt_adt7420_state_save_measure()
     int16_t res = (int16_t)((buf * 10) / 16);
     bool sign = 0x80 & ((temperature & 0xFF00) >> 8);
     res *= (sign ? -1 : 1);
-    mb_table_write(TABLE_Holding_Registers, TEMPERATURE_REGISTER, res);
+    set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, TEMPERATURE_REGISTER, res);
 
-    _adt7420_set_action(&_fmt_adt7420_state_disable_sens);
+    _adt7420_set_action(&_fsm_adt7420_state_disable_sens);
   }
 }
 
-void _fmt_adt7420_state_disable_sens()
+void _fsm_adt7420_state_disable_sens()
 {
-  if (_adt7420_set_sensor_enable_status(TRUE) == I2C_SUCCESS) {
-    adt7420_state.measurments_done = TRUE;
-    _adt7420_set_action(&_fmt_adt7420_state_wait);
+  if (_adt7420_set_sensor_enable_status(true) == I2C_SUCCESS) {
+    adt7420_state.measurments_done = true;
+    _adt7420_set_action(&_fsm_adt7420_state_wait);
   }
 }
 
-void _fmt_adt7420_state_wait() {}
+void _fsm_adt7420_state_wait() {}

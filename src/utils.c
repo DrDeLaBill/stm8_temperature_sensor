@@ -1,8 +1,8 @@
 #include "utils.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
-#include "stm8s.h"
 #include "main.h"
 
 
@@ -22,10 +22,10 @@ bool wait_event(bool (*condition) (void), uint32_t time)
     uint32_t start_time = global_time_ms;
     while (abs_dif(start_time, global_time_ms) < time) {
         if (condition()) {
-            return TRUE;
+            return true;
         }
     }
-    return FALSE;
+    return false;
 }
 
 void delay_ms(uint32_t time) 
