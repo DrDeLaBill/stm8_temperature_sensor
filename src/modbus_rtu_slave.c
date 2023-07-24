@@ -3,7 +3,6 @@
 
 #include <string.h>
 #include <stdbool.h>
-#include "modbus_manager.h"
 
 
 #define SPECIAL_DATA_REGISTERS_COUNT_IDX 0
