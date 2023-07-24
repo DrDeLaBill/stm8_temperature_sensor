@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include "modbus_manager.h"
 
 
 #define SPECIAL_DATA_REGISTERS_COUNT_IDX 0
@@ -282,6 +283,9 @@ void _mb_write_single_register()
 void _mb_write_multiple_registers()
 {
     uint8_t count = mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT - 1];
+    if (mb_state.data_req.register_addr >= MODBUS_REGISTER_SIZE) {
+        return;
+    }
     if (SPECIAL_DATA_META_COUNT + count - 1 > MODBUS_REGISTER_SIZE) {
         count = MODBUS_REGISTER_SIZE - SPECIAL_DATA_META_COUNT;
     }
@@ -289,7 +293,7 @@ void _mb_write_multiple_registers()
     if (mb_state.data_req.command == MODBUS_FORCE_MULTIPLE_COILS) {
         for (uint8_t i = 0; i < count; i++) {
             uint16_t value = (uint16_t)mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT + i];
-            mb_discrete_output_coils[mb_state.data_req.register_addr + i / 2] = value;
+            mb_discrete_output_coils[mb_state.data_req.register_addr + i] = value;
         }
     }
 #endif
@@ -297,7 +301,7 @@ void _mb_write_multiple_registers()
     if (mb_state.data_req.command == MODBUS_PRESET_MULTIPLE_REGISTERS) {
         for (uint8_t i = 0; i < count; i += 2) {
             uint16_t value = (uint16_t)mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT + i] << 8 |
-                             (uint16_t)mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT + i  + 1];
+                             (uint16_t)mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT + i + 1];
             mb_analog_output_holding_registers[mb_state.data_req.register_addr + i / 2] = value;
         }
     }
@@ -384,12 +388,16 @@ void _mb_make_write_single_response()
     mb_state.data_resp.data_resp[counter++] = reg_addr;
 
 #if MODBUS_ENABLE_FORCE_SINGLE_COIL
-    mb_state.data_resp.data_resp[counter++] = mb_discrete_output_coils[reg_addr] >> 8;
-    mb_state.data_resp.data_resp[counter++] = mb_discrete_output_coils[reg_addr];
+    if (mb_state.data_req.command == MODBUS_FORCE_SINGLE_COIL) { 
+        mb_state.data_resp.data_resp[counter++] = mb_discrete_output_coils[reg_addr] >> 8;
+        mb_state.data_resp.data_resp[counter++] = mb_discrete_output_coils[reg_addr];
+    }
 #endif
 #if MODBUS_ENABLE_PRESET_SINGLE_REGISTER
-    mb_state.data_resp.data_resp[counter++] = mb_analog_output_holding_registers[reg_addr] >> 8;
-    mb_state.data_resp.data_resp[counter++] = mb_analog_output_holding_registers[reg_addr];
+    if (mb_state.data_req.command == MODBUS_PRESET_SINGLE_REGISTER) { 
+        mb_state.data_resp.data_resp[counter++] = mb_analog_output_holding_registers[reg_addr] >> 8;
+        mb_state.data_resp.data_resp[counter++] = mb_analog_output_holding_registers[reg_addr];
+    }
 #endif
 
     mb_state.data_resp.data_len = counter;
@@ -444,12 +452,6 @@ void _mb_fsm_request_register_addr(uint8_t byte)
 
 void _mb_fsm_request_special_data(uint8_t byte)
 {
-    uint16_t needed_count = SPECIAL_DATA_VALUE_SIZE;
-
-    if (_mb_is_write_multiple_reg_command()) {
-        needed_count = SPECIAL_DATA_META_COUNT + mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT-1];
-    } 
-
     if (mb_state.data_req.register_addr + _mb_get_needed_registers_count() >= MODBUS_REGISTER_SIZE) {
         _mb_reset_data();
         return;
@@ -462,11 +464,18 @@ void _mb_fsm_request_special_data(uint8_t byte)
 
     mb_state.data_req.special_data[mb_state.data_handler_counter - 1] = byte;
 
+    uint16_t needed_count = SPECIAL_DATA_VALUE_SIZE;
+
+    if (_mb_is_write_multiple_reg_command()) {
+        needed_count = SPECIAL_DATA_META_COUNT + mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT-1];
+    } 
+
     if (mb_state.data_handler_counter == needed_count) {
         mb_state.data_handler_counter = 0;
         mb_state.request_byte_handler = _mb_fsm_request_crc;
         // _mb_set_request_byte_handler(_mb_fsm_request_crc);
     }
+    
 }
 
 void _mb_fsm_request_crc(uint8_t byte)
