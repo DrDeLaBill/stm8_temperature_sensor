@@ -8,21 +8,21 @@
 
 /* MODBUS SLAVE SETTINGS BEGIN */
 // Registers:
-#define MODBUS_ENABLE_DISCRETE_OUTPUT_COILS             true
-#define MODBUS_ENABLE_DISCRETE_INPUT_COILS              true
+#define MODBUS_ENABLE_DISCRETE_OUTPUT_COILS             false
+#define MODBUS_ENABLE_DISCRETE_INPUT_COILS              false
 #define MODBUS_ENABLE_ANALOG_INPUT_REGISTERS            true
 #define MODBUS_ENABLE_ANALOG_OUTPUT_HOLDING_REGISTERS   true
 #define MODBUS_REGISTER_SIZE                            16    // MODBUS default: 9999
 
 // Commands:
-#define MODBUS_ENABLE_COMMAND_READ_COIL_STATUS          true
-#define MODBUS_ENABLE_COMMAND_READ_INPUT_STATUS         true
+#define MODBUS_ENABLE_COMMAND_READ_COIL_STATUS          false
+#define MODBUS_ENABLE_COMMAND_READ_INPUT_STATUS         false
 #define MODBUS_ENABLE_COMMAND_READ_HOLDING_REGISTERS    true
 #define MODBUS_ENABLE_COMMAND_READ_INPUT_REGISTERS      true
-#define MODBUS_ENABLE_COMMAND_FORCE_SINGLE_COIL         true
+#define MODBUS_ENABLE_COMMAND_FORCE_SINGLE_COIL         false
 #define MODBUS_ENABLE_COMMAND_PRESET_SINGLE_REGISTER    true
-#define MODBUS_ENABLE_COMMAND_FORCE_MULTIPLE_COILS      true
-#define MODBUS_ENABLE_COMMAND_PRESET_MULTIPLE_REGISTERS true
+#define MODBUS_ENABLE_COMMAND_FORCE_MULTIPLE_COILS      false
+#define MODBUS_ENABLE_COMMAND_PRESET_MULTIPLE_REGISTERS false
 /* MODBUS SLAVE SETTINGS END */
 
 
@@ -80,8 +80,8 @@ typedef struct _modbus_response_message_t {
 
 typedef struct _modbus_state_t {
     uint8_t slave_id;
-    void (*response_data_handler) (uint8_t* data_req, uint8_t len);
-    void (*request_byte_handler) (uint8_t byte);
+    void (*response_data_handler) (uint8_t*, uint8_t);
+    void (*request_byte_handler) (uint8_t);
     modbus_request_message_t data_req;
     uint8_t data_handler_counter;
     modbus_response_message_t data_resp;
@@ -89,7 +89,7 @@ typedef struct _modbus_state_t {
 } modbus_state_t;
 
 
-void modbus_set_response_data_handler(void (*response_data_handler) (uint8_t* data_req, uint8_t len));
+void modbus_set_response_data_handler(void (*response_data_handler) (uint8_t*, uint8_t));
 void modbus_recieve_data_byte(uint8_t byte);
 void modbus_set_slave_id(uint8_t new_slave_id);
 void modbus_timeout();

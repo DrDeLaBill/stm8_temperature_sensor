@@ -89,6 +89,11 @@ bool adt7420_is_measurments_done()
   return adt7420_state.measurments_done;
 }
 
+void adt7420_enable_sensor()
+{
+  _adt7420_clear_state();
+}
+
 i2c_status_t _adt7420_get_temperature(int16_t* value)
 {
   //Чтение регистров adt7420
@@ -137,7 +142,7 @@ void _adt7420_clear_state()
 
 void _adt7420_set_error_temp()
 {
-  set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, TEMPERATURE_REGISTER, 0xFFFF);
+  set_modbus_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, TEMPERATURE_REGISTER, 0xFFFF);
 }
 
 void _adt7420_set_action(void (*new_action) (void))
@@ -183,7 +188,7 @@ void _fsm_adt7420_state_save_measure()
     int16_t res = (int16_t)((buf * 10) / 16);
     bool sign = 0x80 & ((temperature & 0xFF00) >> 8);
     res *= (sign ? -1 : 1);
-    set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, TEMPERATURE_REGISTER, res);
+    set_modbus_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, TEMPERATURE_REGISTER, res);
 
     _adt7420_set_action(&_fsm_adt7420_state_disable_sens);
   }

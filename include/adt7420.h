@@ -48,6 +48,7 @@ typedef struct _adt7420_state_t {
 //******************************************************************************
 void adt7420_proccess();
 bool adt7420_is_measurments_done();
+void adt7420_enable_sensor();
 i2c_status_t adt7420_init();
 i2c_status_t adt7420_available();
 

@@ -5,8 +5,8 @@
 #include "utils.h"
 
 
-#define BUS_RESET_TIME_MS 10
-#define I2C_DEFAULT_DELAY 5
+#define BUS_RESET_TIME_MS               10
+#define I2C_DEFAULT_DELAY               5
 #define I2C_WAIT_WHILE(condition, time) if (!wait_event(condition, time)) {delay_ms(BUS_RESET_TIME_MS); return I2C_TIMEOUT;}
 
 

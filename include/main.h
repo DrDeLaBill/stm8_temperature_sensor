@@ -2,14 +2,17 @@
 #define _MAIN_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "stm8s.h"
 
 
 // Sensor
+#define SENSOR_VERSION        0x01
 #define DEFAULT_DEVICE_ID     0x01
-#define TEMPERATURE_REGISTER  0x0000 // holding register
-#define SLAVE_ID_REGISTER     0x0001 // input register
+#define TEMPERATURE_REGISTER  0x0000 // output register
+#define VERSION_REGISTER      0x0001 // output register
+#define SLAVE_ID_REGISTER     0x0000 // input register
 #define MAX_SLAVE_ID          0x80
 // CLK
 #define CLK_ICKR_HSI_EN       (uint8_t)0x01
@@ -119,7 +122,7 @@
 // ADT7420
 #define ADT7420_DELAY            (uint32_t)1000
 // MODBUS
-#define MODBUS_TIMEOUT_MS        (uint32_t)500
+#define MODBUS_TIMEOUT_MS        (uint32_t)100
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */
@@ -135,6 +138,7 @@
 
 
 extern volatile uint32_t global_time_ms;
+extern volatile bool is_sensor_sleep;
 
 
 void sensor_sleep();

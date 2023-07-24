@@ -34,6 +34,7 @@ void modbus_manager_init()
     _clear_data();
 
     set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER, sttngs.mb_id);
+    set_modbus_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, VERSION_REGISTER, SENSOR_VERSION);
 }
 
 void modbus_proccess()
@@ -45,6 +46,7 @@ void modbus_proccess()
         _clear_data();
         return;
     }
+
     if (!modbus_data.length) {
         return;
     }
@@ -75,12 +77,12 @@ void _update_mb_id_proccess()
     }
 }
 
-void _modbus_data_handler(uint8_t * data, uint8_t len)
+void _modbus_data_handler(uint8_t* data, uint8_t len)
 {
     if (!len || len > sizeof(modbus_data.data)) {
         return;
     }
-    _clear_data();
+    
     modbus_data.length = len;
     for (uint8_t i = 0; i < len; i++) {
         modbus_data.data[i] = data[i];
@@ -100,8 +102,8 @@ void _send_response()
 
     uart1_state = UART1_SEND;
     uart_tx_data(modbus_data.data, modbus_data.length);
-    delay_ms(3);
     MODBUS_CHECK(&_is_modbus_txe, MODBUS_DEFAULT_DELAY);
+    delay_ms(MODBUS_DEFAULT_DELAY);
 
     uart1_state = UART1_RECIEVE;
     GPIOD->ODR &= ~(uint8_t)(MAX485_PIN);

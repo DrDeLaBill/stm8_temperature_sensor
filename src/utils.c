@@ -19,8 +19,9 @@ bool is_timer_wait(timer_t* tm)
 
 bool wait_event(bool (*condition) (void), uint32_t time)
 {
-    uint32_t start_time = global_time_ms;
-    while (abs_dif(start_time, global_time_ms) < time) {
+    timer_t timer;
+    timer_start(&timer, time);
+    while (is_timer_wait(&timer)) {
         if (condition()) {
             return true;
         }
@@ -30,8 +31,9 @@ bool wait_event(bool (*condition) (void), uint32_t time)
 
 void delay_ms(uint32_t time) 
 {
-    uint32_t start_time = global_time_ms; 
-    while (abs_dif(start_time, global_time_ms) < time);
+    timer_t timer;
+    timer_start(&timer, time);
+    while (is_timer_wait(&timer));
 }
 
 uint32_t abs_dif(int32_t first_n, int32_t second_n)

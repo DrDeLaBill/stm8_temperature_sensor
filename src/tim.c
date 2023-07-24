@@ -5,13 +5,17 @@
 #include "utils.h"
 
 
+#define TIM1_COUNT_DOWN_VALUE 20
+#define TIM1_DEFAULT_DIVIDER  2000
+
+
 void tim_init()
 {
     /* Set the Autoreload value */
-    TIM1->ARRH = (uint8_t)(1 >> 8);
-    TIM1->ARRL = (uint8_t)(1);
+    TIM1->ARRH = (uint8_t)(TIM1_COUNT_DOWN_VALUE >> 8);
+    TIM1->ARRL = (uint8_t)(TIM1_COUNT_DOWN_VALUE);
     /* Set the Prescaler value */
-    uint32_t hsi_divider = get_clock_freq() / 2000;
+    uint32_t hsi_divider = get_clock_freq() / (TIM1_DEFAULT_DIVIDER / TIM1_COUNT_DOWN_VALUE);
     uint32_t presc = (get_clock_freq() / hsi_divider) - 1;
     TIM1->PSCRH = (uint8_t)(presc >> 8);
     TIM1->PSCRL = (uint8_t)(presc);
