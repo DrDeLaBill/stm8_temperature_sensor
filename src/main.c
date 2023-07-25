@@ -17,6 +17,7 @@ void _enable_periph_clk();
 
 
 volatile uint32_t global_time_ms = 0;
+volatile bool is_sensor_sleep = false;
 
 
 int main(void)
@@ -34,11 +35,14 @@ int main(void)
 
     enableInterrupts();
 
-    sensor_sleep();
-
     while (1) {
+      if (is_modbus_busy()) {
+        modbus_proccess();
+        continue;
+      }
+
       adt7420_proccess();
-      modbus_proccess();
+
       if (_check_sensor_need_sleep()) {
         sensor_sleep();
       }
@@ -49,12 +53,18 @@ int main(void)
 
 void sensor_sleep() 
 {
-  CLK->PCKENR1 = (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F));
+  is_sensor_sleep = true;
+  CLK->PCKENR1 &= ~(uint8_t)(
+    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
+    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
+  );
   wfi();
 }
 
 void sensor_wake_up()
 {
+  is_sensor_sleep = false;
+  adt7420_enable_sensor();
   _enable_periph_clk();
 }
 
@@ -65,10 +75,11 @@ bool _check_sensor_need_sleep()
 
 void _enable_periph_clk() 
 {
-  CLK->PCKENR1 = ((uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F))
-               | (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
-               | (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)));
   CLK->PCKENR2 = 0x00;
+  CLK->PCKENR1 |= ((uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F))
+               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
+               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F))
+               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F)));
 }
 
 void system_clock_init()
@@ -122,7 +133,7 @@ void assert_failed(uint8_t* file, uint32_t line)
 { 
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
-  // disableInterrupts();
+  disableInterrupts();
   /* Infinite loop */
   while (1)
   {

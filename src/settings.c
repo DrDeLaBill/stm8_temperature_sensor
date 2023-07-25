@@ -1,6 +1,7 @@
 #include "settings.h"
 
 #include <string.h>
+#include <stdbool.h>
 
 #include "main.h"
 #include "utils.h"
@@ -29,21 +30,21 @@ bool sttngs_load() {
     eeprom_read(EEPROM_START_ADDR, (uint8_t*)&tmp_buf, sizeof(tmp_buf));
 
     if (memcmp(tmp_buf.name, device_name, sizeof(tmp_buf.name))) {
-        return FALSE;
+        return false;
     }
 
     if (tmp_buf.mb_id > MAX_SLAVE_ID || tmp_buf.mb_id == 0) {
-        return FALSE;
+        return false;
     }
 
     uint8_t tmp_crc = get_crc8((uint8_t*)&tmp_buf, sizeof(tmp_buf) - 1);
     if (tmp_crc != tmp_buf.crc) {
-        return FALSE;
+        return false;
     }
 
     memcpy((uint8_t*)&sttngs, (uint8_t*)&tmp_buf, sizeof(sttngs));
 
-    return TRUE;
+    return true;
 }
 
 void sttngs_save() {

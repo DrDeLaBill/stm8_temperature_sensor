@@ -3,8 +3,7 @@
 
 
 #include <stdint.h>
-
-#include "stm8s.h"
+#include <stdbool.h>
 
 
 #define CHAR_PARAM_LEN 16

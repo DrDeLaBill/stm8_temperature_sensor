@@ -1,10 +1,10 @@
 #include "modbus_manager.h"
 
 #include <string.h>
+#include <stdbool.h>
 
 #include "main.h"
-#include "mb.h"
-#include "mb-table.h"
+#include "modbus_rtu_slave.h"
 #include "uart.h"
 #include "utils.h"
 #include "settings.h"
@@ -26,15 +26,15 @@ bool _is_MAX485_free();
 modbus_data_status modbus_data;
 
 
-
 void modbus_manager_init()
 {
     uart_init(UART_BAUD_RATE, get_clock_freq());
-    mb_slave_address_set(sttngs.mb_id);
-    mb_set_tx_handler(&_modbus_data_handler);
+    modbus_set_slave_id(sttngs.mb_id);
+    modbus_set_response_data_handler(&_modbus_data_handler);
     _clear_data();
 
-    mb_table_write(TABLE_Holding_Registers, SLAVE_ID_REGISTER, sttngs.mb_id);
+    set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER, sttngs.mb_id);
+    set_modbus_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, VERSION_REGISTER, SENSOR_VERSION);
 }
 
 void modbus_proccess()
@@ -42,13 +42,15 @@ void modbus_proccess()
     _update_mb_id_proccess();
 
     if (modbus_data.wait_request_byte && !is_timer_wait(&modbus_data.wait_timer)) {
-        mb_rx_timeout_handler();
+        modbus_timeout();
         _clear_data();
         return;
     }
+
     if (!modbus_data.length) {
         return;
     }
+    
     _send_response();
     _clear_data();
 }
@@ -56,9 +58,9 @@ void modbus_proccess()
 void modbus_proccess_byte(uint8_t byte)
 {
     timer_start(&modbus_data.wait_timer, MODBUS_TIMEOUT_MS);
-    modbus_data.wait_request_byte = TRUE;
-    modbus_data.state_in_progress = TRUE;
-    mb_rx_new_data(byte);
+    modbus_data.wait_request_byte = true;
+    modbus_data.state_in_progress = true;
+    modbus_recieve_data_byte(byte);
 }
 
 bool is_modbus_busy()
@@ -68,18 +70,19 @@ bool is_modbus_busy()
 
 void _update_mb_id_proccess() 
 {
-    if (sttngs.mb_id != TABLE_Holding_Registers[SLAVE_ID_REGISTER]) {
-        sttngs_update_mb_id(TABLE_Holding_Registers[SLAVE_ID_REGISTER]);
-        mb_slave_address_set(sttngs.mb_id);
+    uint16_t slave_id = get_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER);
+    if (sttngs.mb_id != slave_id) {
+        sttngs_update_mb_id(slave_id);
+        modbus_set_slave_id(sttngs.mb_id);
     }
 }
 
-void _modbus_data_handler(uint8_t * data, uint8_t len)
+void _modbus_data_handler(uint8_t* data, uint8_t len)
 {
     if (!len || len > sizeof(modbus_data.data)) {
         return;
     }
-    _clear_data();
+    
     modbus_data.length = len;
     for (uint8_t i = 0; i < len; i++) {
         modbus_data.data[i] = data[i];
@@ -89,7 +92,7 @@ void _modbus_data_handler(uint8_t * data, uint8_t len)
 void _send_response()
 {
     if (modbus_data.length > sizeof(modbus_data.data)) {
-        mb_rx_timeout_handler();
+        modbus_timeout();
         _clear_data();
         return;
     }
@@ -99,8 +102,8 @@ void _send_response()
 
     uart1_state = UART1_SEND;
     uart_tx_data(modbus_data.data, modbus_data.length);
-    delay_ms(3);
     MODBUS_CHECK(&_is_modbus_txe, MODBUS_DEFAULT_DELAY);
+    delay_ms(MODBUS_DEFAULT_DELAY);
 
     uart1_state = UART1_RECIEVE;
     GPIOD->ODR &= ~(uint8_t)(MAX485_PIN);

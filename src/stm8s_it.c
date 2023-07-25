@@ -29,8 +29,10 @@
 #include "stm8s_it.h"
 
 #include "main.h"
+#include "stm8s.h"
 #include "uart.h"
 #include "modbus_manager.h"
+#include "adt7420.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -309,6 +311,8 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  adt7420_enable_sensor();
+  TIM2->SR1 &= ~(TIM2_SR1_UIF | TIM2_SR1_CC1IF);
 }
 
 /**
@@ -380,12 +384,14 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
-  sensor_wake_up();
+  if (is_sensor_sleep) {
+    sensor_wake_up();
+  }
+  uint8_t data = UART1->DR;
   if (uart1_state == UART1_SEND) {
-    UART1->DR;
     return;
   }
-  modbus_proccess_byte((uint8_t)UART1->DR);
+  modbus_proccess_byte((uint8_t)data);
 }
 #endif /*STM8S105 || STM8S001 */
 

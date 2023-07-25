@@ -1,17 +1,17 @@
 #include "eeprom.h"
 
 #include <string.h>
+#include <stdbool.h>
 
 #include "stm8s.h"
 #include "main.h"
 #include "utils.h"
 
 
-#define FLASH_RASS_KEY1 ((uint8_t)0x56) /*!< First RASS key */
-#define FLASH_RASS_KEY2 ((uint8_t)0xAE) /*!< Second RASS key */
-
-#define EEPROM_WAIT_WHILE(condition, time) if (!wait_event(condition, time)) {return FALSE;}
-#define EEPROM_TIMEOUT 10
+#define EEPROM_WAIT_WHILE(condition, time) if (!wait_event(condition, time)) {return false;}
+#define FLASH_RASS_KEY1                    ((uint8_t)0x56) /*!< First RASS key */
+#define FLASH_RASS_KEY2                    ((uint8_t)0xAE) /*!< Second RASS key */
+#define EEPROM_TIMEOUT                     10
 
 
 bool _if_IAPSR_DUL();
@@ -34,7 +34,7 @@ bool eeprom_write(uint16_t addr, uint8_t *buf, uint16_t len) {
     /* lock EEPROM */
     FLASH->IAPSR &= ~(1 << FLASH_IAPSR_DUL);
     
-    return TRUE;
+    return true;
 }
 
 void eeprom_read(uint16_t addr, uint8_t *buf, int len) {
