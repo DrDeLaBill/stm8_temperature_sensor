@@ -14,7 +14,7 @@ MODBUS ID | Analog Output Holding Registers | 0x0000 | R/W | 0x01...0x80 | 0x01
 ## Tempreature request example
 ```
 Request:  01 04 00 00 00 01 31 f9
-Response: 02 04 02 00 f9 7d 73
+Response: 01 04 02 00 f9 7d 73
 
 Value: 0xFA => 249
 Temperature: 24.9°C
