@@ -1,4 +1,4 @@
-# MODBUS TEMPERATURE SENSOR
+# Modbus RTU temperature sensor
 
 The sensor based on STM8F003 chip uses ADT7420 to measure temperature.
 
