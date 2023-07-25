@@ -32,6 +32,7 @@
 #include "stm8s.h"
 #include "uart.h"
 #include "modbus_manager.h"
+#include "adt7420.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -310,6 +311,8 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  adt7420_enable_sensor();
+  TIM2->SR1 &= ~(TIM2_SR1_UIF | TIM2_SR1_CC1IF);
 }
 
 /**

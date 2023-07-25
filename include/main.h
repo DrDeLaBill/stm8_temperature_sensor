@@ -15,10 +15,10 @@
 #define SLAVE_ID_REGISTER     0x0000 // input register
 #define MAX_SLAVE_ID          0x80
 // CLK
-#define CLK_ICKR_HSI_EN       (uint8_t)0x01
-#define CLK_ICKR_HSI_RDY      (uint8_t)0x02
-#define CLK_PRESCALER_HSIDIV  (uint8_t)0x18
-#define CLK_PRESCALER_CPUDIV  (uint8_t)0x01   /*!< CPU clock division factors 1 */
+#define CLK_ICKR_HSI_EN       ((uint8_t)0x01)
+#define CLK_ICKR_HSI_RDY      ((uint8_t)0x02)
+#define CLK_PRESCALER_HSIDIV  ((uint8_t)0x18)
+#define CLK_PRESCALER_CPUDIV  ((uint8_t)0x01) /*!< CPU clock division factors 1 */
 #define CLK_CCOR_CCOEN        ((uint8_t)0x01) /*!< Configurable clock output enable */
 #define CLK_PCKENR1_TIM1      ((uint8_t)0x80) /*!< Timer 1 clock enable */ 
 #define CLK_PCKENR1_TIM2      ((uint8_t)0x20) /*!< Timer 2 clock enable */
@@ -33,55 +33,21 @@
 #define CLK_PERIPHERAL_UART1   (uint8_t)0x03 /*!< Peripheral Clock Enable 1, UART1 */
 #define CLK_PERIPHERAL_I2C     (uint8_t)0x00 /*!< Peripheral Clock Enable 1, I2C */
 #define CLK_PERIPHERAL_TIMER1  (uint8_t)0x07 /*!< Peripheral Clock Enable 1, Timer1 */
-// EEPROM
-#define _MEM_(mem_addr)         (*(volatile uint8_t *)(mem_addr))
-
-#define EEPROM_START_ADDR       0x4010
-#define EEPROM_END_ADDR         0x407F
+#define CLK_PERIPHERAL_TIMER2  (uint8_t)0x05 /*!< Peripheral Clock Enable 1, Timer1 */
 // TIM1
-#define TIM_PRESCALER             (uint16_t)1000
-#define TIM_PERIOD                (uint16_t)10
-#define TIM_REP_COUNTER           (uint8_t)0x00
+#define TIM1_PRESCALER            ((uint16_t)1000)
+#define TIM1_PERIOD               ((uint16_t)10)
+#define TIM1_REP_COUNTER          ((uint8_t)0x00)
 #define TIM1_COUNTERMODE_DOWN     ((uint8_t)0x10)
 #define TIM1_PSCRELOADMODE_UPDATE ((uint8_t)0x00)
 #define TIM1_IT_UPDATE            ((uint8_t)0x01)
 #define TIM1_IT_CC1               ((uint8_t)0x02)
 
-#define TIM1_CR1_CMS     ((uint8_t)0x60) /*!< Center-aligned Mode Selection mask. */
-#define TIM1_CR1_DIR     ((uint8_t)0x10) /*!< Direction mask. */
-
-#define TIM1_CR1_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_CR2_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_SMCR_RESET_VALUE  ((uint8_t)0x00)
-#define TIM1_ETR_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_IER_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_SR1_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_SR2_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_EGR_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_CCMR1_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCMR2_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCMR3_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCMR4_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCER1_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCER2_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CNTRH_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CNTRL_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_PSCRH_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_PSCRL_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_ARRH_RESET_VALUE  ((uint8_t)0xFF)
-#define TIM1_ARRL_RESET_VALUE  ((uint8_t)0xFF)
-#define TIM1_RCR_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_CCR1H_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR1L_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR2H_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR2L_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR3H_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR3L_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR4H_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_CCR4L_RESET_VALUE ((uint8_t)0x00)
-#define TIM1_BKR_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_DTR_RESET_VALUE   ((uint8_t)0x00)
-#define TIM1_OISR_RESET_VALUE  ((uint8_t)0x00)
+#define TIM1_CR1_CMS              ((uint8_t)0x60) /*!< Center-aligned Mode Selection mask. */
+#define TIM1_CR1_DIR              ((uint8_t)0x10) /*!< Direction mask. */
+// TIM2
+#define TIM2_PRESCALER_256        ((uint8_t)0x08)
+#define TIM2_PRESCALER            TIM2_PRESCALER_256
 // GPIO
 #define GPIO_ODR_RESET_VALUE ((uint8_t)0x00)
 #define GPIO_DDR_RESET_VALUE ((uint8_t)0x00)
@@ -116,13 +82,14 @@
 // I2C
 #define I2C_FREQ           I2C_MAX_STANDARD_FREQ
 #define I2C_ACK            0x01
-#define I2C_ADT7420_ADDR   (uint8_t)(0x48 << 1 | 0)
+#define I2C_ADT7420_ADDR   ((uint8_t)(0x48 << 1 | 0))
 #define SET16BITMODE       0b10100000
 #define F_I2C_HZ           100000UL
 // ADT7420
-#define ADT7420_DELAY            (uint32_t)1000
+#define ADT7420_DELAY            ((uint32_t)1000)
+#define ADT7420_MEASURE_TIME     ((uint32_t)5000)
 // MODBUS
-#define MODBUS_TIMEOUT_MS        (uint32_t)100
+#define MODBUS_TIMEOUT_MS        ((uint32_t)100)
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */

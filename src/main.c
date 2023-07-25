@@ -35,8 +35,6 @@ int main(void)
 
     enableInterrupts();
 
-    sensor_sleep();
-
     while (1) {
       if (is_modbus_busy()) {
         modbus_proccess();
@@ -57,8 +55,8 @@ void sensor_sleep()
 {
   is_sensor_sleep = true;
   CLK->PCKENR1 &= ~(uint8_t)(
-    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F)) |
-    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F))
+    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
+    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
   );
   wfi();
 }
@@ -80,7 +78,8 @@ void _enable_periph_clk()
   CLK->PCKENR2 = 0x00;
   CLK->PCKENR1 |= ((uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F))
                |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)));
+               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F))
+               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F)));
 }
 
 void system_clock_init()

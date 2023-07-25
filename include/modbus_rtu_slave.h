@@ -2,6 +2,11 @@
 #define _MODBUS_PROTOCOL_H_
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -96,6 +101,11 @@ void modbus_timeout();
 
 uint16_t get_modbus_register_value(register_type_t register_type, uint16_t register_id);
 void set_modbus_register_value(register_type_t register_type, uint16_t register_id, uint16_t value);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif

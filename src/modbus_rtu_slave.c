@@ -451,6 +451,12 @@ void _mb_fsm_request_register_addr(uint8_t byte)
 
 void _mb_fsm_request_special_data(uint8_t byte)
 {
+    uint16_t needed_count = 0;
+
+    if (!_mb_is_recieved_own_slave_id()) {
+        goto do_count_special_data;
+    }
+
     if (mb_state.data_req.register_addr + _mb_get_needed_registers_count() >= MODBUS_REGISTER_SIZE) {
         _mb_reset_data();
         return;
@@ -463,7 +469,10 @@ void _mb_fsm_request_special_data(uint8_t byte)
 
     mb_state.data_req.special_data[mb_state.data_handler_counter - 1] = byte;
 
-    uint16_t needed_count = SPECIAL_DATA_VALUE_SIZE;
+
+do_count_special_data:
+
+    needed_count = SPECIAL_DATA_VALUE_SIZE;
 
     if (_mb_is_write_multiple_reg_command()) {
         needed_count = SPECIAL_DATA_META_COUNT + mb_state.data_req.special_data[SPECIAL_DATA_META_COUNT-1];
@@ -490,10 +499,12 @@ void _mb_fsm_request_crc(uint8_t byte)
         mb_state.data_handler_counter = 0;
         mb_state.request_byte_handler = _mb_fsm_request_slave_id;
         // _mb_set_request_byte_handler(_mb_fsm_request_slave_id);
-        return;
+        goto do_reset_data;
     }
 
     _mb_request_proccess();
+
+do_reset_data:
     _mb_reset_data();
 }
 

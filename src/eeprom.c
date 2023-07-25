@@ -8,11 +8,10 @@
 #include "utils.h"
 
 
-#define FLASH_RASS_KEY1 ((uint8_t)0x56) /*!< First RASS key */
-#define FLASH_RASS_KEY2 ((uint8_t)0xAE) /*!< Second RASS key */
-
 #define EEPROM_WAIT_WHILE(condition, time) if (!wait_event(condition, time)) {return false;}
-#define EEPROM_TIMEOUT 10
+#define FLASH_RASS_KEY1                    ((uint8_t)0x56) /*!< First RASS key */
+#define FLASH_RASS_KEY2                    ((uint8_t)0xAE) /*!< Second RASS key */
+#define EEPROM_TIMEOUT                     10
 
 
 bool _if_IAPSR_DUL();

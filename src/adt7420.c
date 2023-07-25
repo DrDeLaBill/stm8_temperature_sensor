@@ -55,6 +55,7 @@ do_error:
   goto do_exit;
 
 do_exit:
+  _adt7420_clear_state();
   return status;
 }
 
