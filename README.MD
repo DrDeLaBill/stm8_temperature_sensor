@@ -19,3 +19,7 @@ Response: 01 04 02 00 f9 7d 73
 Value: 0xFA => 249
 Temperature: 24.9°C
 ```
+
+## Schematic
+
+<img src=./readme_src/schematic.png>
