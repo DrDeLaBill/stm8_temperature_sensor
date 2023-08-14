@@ -29,12 +29,12 @@ modbus_data_status modbus_data;
 void modbus_manager_init()
 {
     uart_init(UART_BAUD_RATE, get_clock_freq());
-    modbus_set_slave_id(sttngs.mb_id);
-    modbus_set_response_data_handler(&_modbus_data_handler);
+    modbus_slave_set_slave_id(sttngs.mb_id);
+    modbus_slave_set_response_data_handler(&_modbus_data_handler);
     _clear_data();
 
-    set_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER, sttngs.mb_id);
-    set_modbus_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, VERSION_REGISTER, SENSOR_VERSION);
+    modbus_slave_set_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER, sttngs.mb_id);
+    modbus_slave_set_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, VERSION_REGISTER, SENSOR_VERSION);
 }
 
 void modbus_proccess()
@@ -42,7 +42,7 @@ void modbus_proccess()
     _update_mb_id_proccess();
 
     if (modbus_data.wait_request_byte && !is_timer_wait(&modbus_data.wait_timer)) {
-        modbus_timeout();
+        modbus_slave_timeout();
         _clear_data();
         return;
     }
@@ -60,7 +60,7 @@ void modbus_proccess_byte(uint8_t byte)
     timer_start(&modbus_data.wait_timer, MODBUS_TIMEOUT_MS);
     modbus_data.wait_request_byte = true;
     modbus_data.state_in_progress = true;
-    modbus_recieve_data_byte(byte);
+    modbus_slave_recieve_data_byte(byte);
 }
 
 bool is_modbus_busy()
@@ -70,10 +70,10 @@ bool is_modbus_busy()
 
 void _update_mb_id_proccess() 
 {
-    uint16_t slave_id = get_modbus_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER);
+    uint16_t slave_id = modbus_slave_get_register_value(MODBUS_REGISTER_ANALOG_OUTPUT_HOLDING_REGISTERS, SLAVE_ID_REGISTER);
     if (sttngs.mb_id != slave_id) {
         sttngs_update_mb_id(slave_id);
-        modbus_set_slave_id(sttngs.mb_id);
+        modbus_slave_set_slave_id(sttngs.mb_id);
     }
 }
 
@@ -92,7 +92,7 @@ void _modbus_data_handler(uint8_t* data, uint8_t len)
 void _send_response()
 {
     if (modbus_data.length > sizeof(modbus_data.data)) {
-        modbus_timeout();
+        modbus_slave_timeout();
         _clear_data();
         return;
     }
