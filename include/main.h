@@ -89,7 +89,7 @@
 #define ADT7420_DELAY            ((uint32_t)1000)
 #define ADT7420_MEASURE_TIME     ((uint32_t)5000)
 // MODBUS
-#define MODBUS_TIMEOUT_MS        ((uint32_t)100)
+#define MODBUS_TIMEOUT_MS        ((uint32_t)10)
 // IWDG
 #define IWDG_KEY_ENABLE          ((uint8_t)0xCC) /*!<  This value written in the Key register start the watchdog counting down*/
 #define IWDG_WriteAccess_Enable  ((uint8_t)0x55) /*!< Code 0x55 in Key register, allow write access to Prescaler and Reload registers */

@@ -15,9 +15,6 @@ bool _is_uart_txe();
 bool _is_uart_rxne();
 
 
-UART1_STATE_Typedef uart1_state = UART1_RECIEVE;
-
-
 void uart_init(uint32_t baud_rate, uint32_t f_master) {
   
   //Значение регистра BRR

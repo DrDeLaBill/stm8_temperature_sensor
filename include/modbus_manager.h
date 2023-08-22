@@ -16,8 +16,10 @@ typedef struct modbus_data_status_typedef {
     uint8_t data[MODBUS_REGISTER_SIZE + 10];
     uint8_t length;
     timer_t wait_timer;
+    timer_t byte_timer;
     bool wait_request_byte;
     bool state_in_progress;
+    bool is_response_ready;
 } modbus_data_status;
 
 

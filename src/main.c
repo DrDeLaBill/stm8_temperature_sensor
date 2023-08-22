@@ -1,5 +1,7 @@
 #include "main.h"
 
+#include <stdbool.h>
+
 #include "stm8s.h"
 #include "stm8s_it.h"
 
@@ -19,6 +21,8 @@ void _enable_periph_clk();
 volatile uint32_t global_time_ms = 0;
 volatile bool is_sensor_sleep = false;
 
+timer_t wait_timer = { 0 };
+
 
 int main(void)
 {
@@ -35,7 +39,7 @@ int main(void)
 
     enableInterrupts();
 
-    while (1) {
+    while (true) {
       if (is_modbus_busy()) {
         modbus_proccess();
         continue;
@@ -84,6 +88,21 @@ void _enable_periph_clk()
 
 void system_clock_init()
 {
+  // CLK deinit
+  CLK->ICKR = CLK_ICKR_RESET_VALUE;
+  CLK->ECKR = CLK_ECKR_RESET_VALUE;
+  CLK->SWR  = CLK_SWR_RESET_VALUE;
+  CLK->SWCR = CLK_SWCR_RESET_VALUE;
+  CLK->CKDIVR = CLK_CKDIVR_RESET_VALUE;
+  CLK->PCKENR1 = CLK_PCKENR1_RESET_VALUE;
+  CLK->PCKENR2 = CLK_PCKENR2_RESET_VALUE;
+  CLK->CSSR = CLK_CSSR_RESET_VALUE;
+  CLK->CCOR = CLK_CCOR_RESET_VALUE;
+  while ((CLK->CCOR & CLK_CCOR_CCOEN)!= 0);
+  CLK->CCOR = CLK_CCOR_RESET_VALUE;
+  CLK->HSITRIMR = CLK_HSITRIMR_RESET_VALUE;
+  CLK->SWIMCCR = CLK_SWIMCCR_RESET_VALUE;
+
   CLK->ICKR &= 0x00;
   CLK->ICKR |= CLK_ICKR_HSI_EN;
 
@@ -134,9 +153,8 @@ void assert_failed(uint8_t* file, uint32_t line)
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   disableInterrupts();
+  IWDG->KR = IWDG_KEY_ENABLE;
   /* Infinite loop */
-  while (1)
-  {
-  }
+  while (1);
 }
 #endif
