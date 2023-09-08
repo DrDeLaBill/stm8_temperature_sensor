@@ -54,7 +54,7 @@
 #define GPIO_CR1_RESET_VALUE ((uint8_t)0x00)
 #define GPIO_CR2_RESET_VALUE ((uint8_t)0x00)
 // UART1
-#define UART_BAUD_RATE     (uint32_t)9600
+#define UART_BAUD_RATE     (uint32_t)115200
 #define UART_WORDLENGTH    0x00
 #define UART_STOP_BITS     0x00
 #define UART_PARITY        0x00

@@ -15,7 +15,8 @@
         "stdint.h": "c",
         "mb-link.h": "c",
         "modbus_rtu_base.h": "c",
-        "modbus_manager.h": "c"
+        "modbus_manager.h": "c",
+        "modbus_rtu_slave.h": "c"
     },
     "cmake.configureOnOpen": true
 }

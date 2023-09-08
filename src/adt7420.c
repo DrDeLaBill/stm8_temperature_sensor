@@ -63,6 +63,7 @@ void adt7420_proccess()
 {
   if (!adt7420_state.adt_init_success) {
     _adt7420_set_error_temp();
+    adt7420_init();
     return;
   }
 
@@ -97,7 +98,6 @@ void adt7420_enable_sensor()
 
 i2c_status_t _adt7420_get_temperature(int16_t* value)
 {
-  //Чтение регистров adt7420
   uint8_t resp_h = 0;
   uint8_t resp_l = 0;
 
