@@ -15,7 +15,7 @@
 #define MODBUS_CHECK(condition, time) if (!wait_event(condition, time)) {return;}
 
 
-void _modbus_data_handler(uint8_t * data, uint8_t len);
+void _modbus_data_handler(uint8_t * data, uint32_t len);
 void _send_response();
 void _update_mb_id_proccess();
 void _clear_data();
@@ -94,7 +94,7 @@ void _update_mb_id_proccess()
     }
 }
 
-void _modbus_data_handler(uint8_t* data, uint8_t len)
+void _modbus_data_handler(uint8_t* data, uint32_t len)
 {
     modbus_data.is_response_ready = true;
 

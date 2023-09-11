@@ -18,10 +18,8 @@ bool _check_sensor_need_sleep();
 void _enable_periph_clk();
 
 
-volatile uint32_t global_time_ms = 0;
-volatile bool is_sensor_sleep = false;
-
-timer_t wait_timer = { 0 };
+volatile uint32_t global_time_ms  = 0;
+volatile bool     is_sensor_sleep = false;
 
 
 int main(void)
@@ -29,6 +27,9 @@ int main(void)
     system_clock_init();
     tim_init();
     gpio_init();
+
+    enableInterrupts();
+    
     adt7420_init();
 
     if (!sttngs_load()) {
@@ -36,8 +37,6 @@ int main(void)
     }
     
     modbus_manager_init();
-
-    enableInterrupts();
 
     while (true) {
       if (is_modbus_busy()) {
