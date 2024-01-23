@@ -18,14 +18,13 @@
 #define CLK_ICKR_HSI_EN       ((uint8_t)0x01)
 #define CLK_ICKR_HSI_RDY      ((uint8_t)0x02)
 #define CLK_PRESCALER_HSIDIV  ((uint8_t)0x18)
-#define CLK_PRESCALER_CPUDIV  ((uint8_t)0x01) /*!< CPU clock division factors 1 */
+#define CLK_PRESCALER_CPUDIV  ((uint8_t)0x00) /*!< CPU clock division factors 1 */
 #define CLK_CCOR_CCOEN        ((uint8_t)0x01) /*!< Configurable clock output enable */
 #define CLK_PCKENR1_TIM1      ((uint8_t)0x80) /*!< Timer 1 clock enable */ 
 #define CLK_PCKENR1_TIM2      ((uint8_t)0x20) /*!< Timer 2 clock enable */
 #define CLK_PCKENR1_UART1     ((uint8_t)0x04) /*!< UART1 clock enable */
 #define CLK_PCKENR1_I2C       ((uint8_t)0x01) /*!< I2C clock enable */
 #define CLK_ICKR_HSIRDY       ((uint8_t)0x02) /*!< High speed internal RC oscillator ready */
-#define CLK_CKDIVR_HSIDIV     ((uint8_t)0x18) /*!< High speed internal clock prescaler */
 #define CLK_SWCR_SWEN         ((uint8_t)0x02) /*!< Switch start/stop */
 #define CLK_SWCR_SWBSY        ((uint8_t)0x01) /*!< Switch busy flag*/
 #define HSI_VALUE             ((uint32_t)16000000) /*!< Typical Value of the HSI in Hz */
@@ -54,7 +53,7 @@
 #define GPIO_CR1_RESET_VALUE ((uint8_t)0x00)
 #define GPIO_CR2_RESET_VALUE ((uint8_t)0x00)
 // UART1
-#define UART_BAUD_RATE     (uint32_t)9600
+#define UART_BAUD_RATE     ((uint32_t)115200)
 #define UART_WORDLENGTH    0x00
 #define UART_STOP_BITS     0x00
 #define UART_PARITY        0x00

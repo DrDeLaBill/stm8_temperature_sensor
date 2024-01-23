@@ -12,8 +12,13 @@
 #define MODBUS_BUF_SIZE 20
 
 
+#define MODBUS_DATA_SIZE (MODBUS_SLAVE_OUTPUT_HOLDING_REGISTERS_COUNT > MODBUS_SLAVE_INPUT_REGISTERS_COUNT ? MODBUS_SLAVE_OUTPUT_HOLDING_REGISTERS_COUNT : MODBUS_SLAVE_INPUT_REGISTERS_COUNT + 10)
 typedef struct modbus_data_status_typedef {
-    uint8_t data[MODBUS_REGISTER_SIZE + 10];
+    uint8_t req[MODBUS_DATA_SIZE];
+    uint8_t req_counter;
+    uint8_t proc_counter;
+
+    uint8_t resp[MODBUS_DATA_SIZE];
     uint8_t length;
     timer_t wait_timer;
     timer_t byte_timer;

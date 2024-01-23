@@ -6,10 +6,11 @@
 #include "stm8s_it.h"
 
 #include "tim.h"
+#include "uart.h"
 #include "utils.h"
 #include "adt7420.h"
-#include "modbus_manager.h"
 #include "settings.h"
+#include "modbus_manager.h"
 
 
 void system_clock_init();
@@ -50,16 +51,15 @@ int main(void)
         sensor_sleep();
       }
     }
-
-    return 0;
 }
 
 void sensor_sleep() 
 {
   is_sensor_sleep = true;
   CLK->PCKENR1 &= ~(uint8_t)(
-    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
-    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C    & (uint8_t)0x0F))
   );
   wfi();
 }
@@ -79,10 +79,12 @@ bool _check_sensor_need_sleep()
 void _enable_periph_clk() 
 {
   CLK->PCKENR2 = 0x00;
-  CLK->PCKENR1 |= ((uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F)));
+  CLK->PCKENR1 = (
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1  & (uint8_t)0x0F)) | 
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C    & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F))
+  );
 }
 
 void system_clock_init()
@@ -113,6 +115,8 @@ void system_clock_init()
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV;
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_CPUDIV;
 
+  CLK->PCKENR1 = 0x00;
+  CLK->PCKENR2 = 0x00;
   _enable_periph_clk();
 }
 
@@ -151,6 +155,8 @@ void assert_failed(uint8_t* file, uint32_t line)
 { 
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  (void)file;
+  (void)line;
   disableInterrupts();
   IWDG->KR = IWDG_KEY_ENABLE;
   /* Infinite loop */
