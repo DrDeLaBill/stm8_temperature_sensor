@@ -1,6 +1,7 @@
 #include "eeprom.h"
 
 #include <string.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #include "stm8s.h"
@@ -32,7 +33,7 @@ bool eeprom_write(uint16_t addr, uint8_t *buf, uint16_t len) {
     }
 
     /* lock EEPROM */
-    FLASH->IAPSR &= ~(1 << FLASH_IAPSR_DUL);
+    FLASH->IAPSR &= ~(((uint8_t)0x01) << (FLASH_IAPSR_DUL));
     
     return true;
 }

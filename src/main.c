@@ -1,13 +1,16 @@
 #include "main.h"
 
+#include <stdbool.h>
+
 #include "stm8s.h"
 #include "stm8s_it.h"
 
 #include "tim.h"
+#include "uart.h"
 #include "utils.h"
 #include "adt7420.h"
-#include "modbus_manager.h"
 #include "settings.h"
+#include "modbus_manager.h"
 
 
 void system_clock_init();
@@ -16,8 +19,8 @@ bool _check_sensor_need_sleep();
 void _enable_periph_clk();
 
 
-volatile uint32_t global_time_ms = 0;
-volatile bool is_sensor_sleep = false;
+volatile uint32_t global_time_ms  = 0;
+volatile bool     is_sensor_sleep = false;
 
 
 int main(void)
@@ -25,6 +28,9 @@ int main(void)
     system_clock_init();
     tim_init();
     gpio_init();
+
+    enableInterrupts();
+    
     adt7420_init();
 
     if (!sttngs_load()) {
@@ -33,9 +39,7 @@ int main(void)
     
     modbus_manager_init();
 
-    enableInterrupts();
-
-    while (1) {
+    while (true) {
       if (is_modbus_busy()) {
         modbus_proccess();
         continue;
@@ -47,16 +51,15 @@ int main(void)
         sensor_sleep();
       }
     }
-
-    return 0;
 }
 
 void sensor_sleep() 
 {
   is_sensor_sleep = true;
   CLK->PCKENR1 &= ~(uint8_t)(
-    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
-    ((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C    & (uint8_t)0x0F))
   );
   wfi();
 }
@@ -76,14 +79,31 @@ bool _check_sensor_need_sleep()
 void _enable_periph_clk() 
 {
   CLK->PCKENR2 = 0x00;
-  CLK->PCKENR1 |= ((uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1 & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F))
-               |  (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F)));
+  CLK->PCKENR1 = (
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_UART1  & (uint8_t)0x0F)) | 
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_I2C    & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER1 & (uint8_t)0x0F)) |
+    (uint8_t)((uint8_t)1 << ((uint8_t)CLK_PERIPHERAL_TIMER2 & (uint8_t)0x0F))
+  );
 }
 
 void system_clock_init()
 {
+  // CLK deinit
+  CLK->ICKR = CLK_ICKR_RESET_VALUE;
+  CLK->ECKR = CLK_ECKR_RESET_VALUE;
+  CLK->SWR  = CLK_SWR_RESET_VALUE;
+  CLK->SWCR = CLK_SWCR_RESET_VALUE;
+  CLK->CKDIVR = CLK_CKDIVR_RESET_VALUE;
+  CLK->PCKENR1 = CLK_PCKENR1_RESET_VALUE;
+  CLK->PCKENR2 = CLK_PCKENR2_RESET_VALUE;
+  CLK->CSSR = CLK_CSSR_RESET_VALUE;
+  CLK->CCOR = CLK_CCOR_RESET_VALUE;
+  while ((CLK->CCOR & CLK_CCOR_CCOEN)!= 0);
+  CLK->CCOR = CLK_CCOR_RESET_VALUE;
+  CLK->HSITRIMR = CLK_HSITRIMR_RESET_VALUE;
+  CLK->SWIMCCR = CLK_SWIMCCR_RESET_VALUE;
+
   CLK->ICKR &= 0x00;
   CLK->ICKR |= CLK_ICKR_HSI_EN;
 
@@ -95,6 +115,8 @@ void system_clock_init()
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_HSIDIV;
   CLK->CKDIVR |= (uint8_t)CLK_PRESCALER_CPUDIV;
 
+  CLK->PCKENR1 = 0x00;
+  CLK->PCKENR2 = 0x00;
   _enable_periph_clk();
 }
 
@@ -133,10 +155,11 @@ void assert_failed(uint8_t* file, uint32_t line)
 { 
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  (void)file;
+  (void)line;
   disableInterrupts();
+  IWDG->KR = IWDG_KEY_ENABLE;
   /* Infinite loop */
-  while (1)
-  {
-  }
+  while (1);
 }
 #endif

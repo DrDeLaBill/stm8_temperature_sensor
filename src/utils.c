@@ -36,11 +36,6 @@ void delay_ms(uint32_t time)
     while (is_timer_wait(&timer));
 }
 
-uint32_t abs_dif(int32_t first_n, int32_t second_n)
-{
-    return (int32_t)(((first_n) > (second_n)) ? ((first_n) - (second_n)) : ((second_n) - (first_n)));
-}
-
 uint32_t abs(int32_t number)
 {
     return (int32_t)(((number) < 0) ? (-1 * (number)) : (number));
@@ -62,16 +57,17 @@ uint32_t get_clock_freq()
 {
   uint32_t clock_frequency = 0;
   uint8_t clock_source;
-  uint8_t tmp = 0, presc = 0;
-  const uint8_t HSI_div_factor[4] = {1, 2, 4, 8}; /*!< Holds the different HSI Divider factors */
+  const uint8_t HSI_div_factor[] = { 1, 2, 4, 8 }; /*!< Holds the different HSI Divider factors */
+  // const uint8_t CPU_div_factor[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
   
   /* Get CLK source. */
   clock_source = (uint8_t)CLK->CMSR;
   
-  tmp = (uint8_t)(CLK->CKDIVR & CLK_CKDIVR_HSIDIV);
-  tmp = (uint8_t)(tmp >> 3);
-  presc = HSI_div_factor[tmp];
-  clock_frequency = HSI_VALUE / presc;
+  uint8_t presc_idx = 0, HSI_presc = 0;
+  presc_idx = (uint8_t)(CLK->CKDIVR & CLK_CKDIVR_HSIDIV);
+  presc_idx = (uint8_t)(presc_idx >> 3);
+  HSI_presc = HSI_div_factor[presc_idx];
+  clock_frequency = (HSI_VALUE / HSI_presc);
 
   return ((uint32_t)clock_frequency);
 }

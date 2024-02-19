@@ -326,6 +326,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  TIM2->SR1 = 0x00;
 }
 #endif /*STM8S903*/
 
@@ -371,6 +372,7 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  UART1->DR = 0xFF;
 }
 
 /**
@@ -384,13 +386,11 @@ INTERRUPT_HANDLER(TIM1_CAP_COM_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  UART1->SR;
   if (is_sensor_sleep) {
     sensor_wake_up();
   }
   uint8_t data = UART1->DR;
-  if (uart1_state == UART1_SEND) {
-    return;
-  }
   modbus_proccess_byte((uint8_t)data);
 }
 #endif /*STM8S105 || STM8S001 */

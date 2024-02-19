@@ -14,6 +14,8 @@
 #define CONFIG_READ      (uint8_t)0b01000000
 #define STATUS_RDY       (uint8_t)0b10000000
 
+#define ERROR_TEMPERATURE  ((int16_t)0xFFFF)
+
 
 adt7420_state_t adt7420_state;
 
@@ -63,6 +65,7 @@ void adt7420_proccess()
 {
   if (!adt7420_state.adt_init_success) {
     _adt7420_set_error_temp();
+    adt7420_init();
     return;
   }
 
@@ -97,28 +100,30 @@ void adt7420_enable_sensor()
 
 i2c_status_t _adt7420_get_temperature(int16_t* value)
 {
-  //Чтение регистров adt7420
   uint8_t resp_h = 0;
   uint8_t resp_l = 0;
 
   i2c_status_t status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_MOST_SIGNIFICANT_BYTE, &resp_h, 1);
+  int16_t result = 0x0000;
   if (status == I2C_SUCCESS) {
-    *value |= ((uint16_t)resp_h << 8);
+    result |= ((uint16_t)resp_h << 8);
   } else {
     goto do_error;
   }
 
   status = i2c_rd_reg(I2C_ADT7420_ADDR, ADT7420_LEAT_SIGNIFICANT_BYTE, &resp_l, 1);
   if (status == I2C_SUCCESS) {
-    *value |= (uint16_t)resp_l;
+    result |= (uint16_t)resp_l;
   } else {
     goto do_error;
   }
 
+  *value = result;
+
   goto do_exit;
 
 do_error:
-  *value = (int16_t)0xFFFF;
+  *value = ERROR_TEMPERATURE;
 
 do_exit:
   return status;
@@ -143,7 +148,7 @@ void _adt7420_clear_state()
 
 void _adt7420_set_error_temp()
 {
-  modbus_slave_set_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, TEMPERATURE_REGISTER, 0xFFFF);
+  modbus_slave_set_register_value(MODBUS_REGISTER_ANALOG_INPUT_REGISTERS, TEMPERATURE_REGISTER, ERROR_TEMPERATURE);
 }
 
 void _adt7420_set_action(void (*new_action) (void))
@@ -183,7 +188,7 @@ void _fsm_adt7420_state_wait_measure()
 
 void _fsm_adt7420_state_save_measure()
 {
-  int16_t temperature = 0x0000;
+  int16_t temperature = ERROR_TEMPERATURE;
   if (_adt7420_get_temperature(&temperature) == I2C_SUCCESS) {
     uint16_t buf = (((uint16_t)((temperature & 0xFF00) >> 8) & 0x7F) << 5) | ((uint8_t)(temperature & 0x00FF) >> 3);
     int16_t res = (int16_t)((buf * 10) / 16);
